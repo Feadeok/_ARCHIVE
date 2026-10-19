@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f6e6e7">
+<title>자캐 아카이브 — 나만의 캐릭터 보관함</title>
+<style>
+  :root{
+    --ink:#292b32; --muted:#777d86; --line:#e8e7e8; --paper:#fffdfc;
+    --pink:#f6dfe2; --blue:#dcecf7; --lav:#ece6f7; --yellow:#fff0c8;
+    --shadow:0 8px 28px rgba(57,52,67,.08); --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:#fbfaf9}
+  button,input,select{font:inherit}
+  button{cursor:pointer}
+  a{color:inherit;text-decoration:none}
+  .app{min-height:100vh}
+  .topbar{height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 max(22px,calc((100vw - 1440px)/2));background:rgba(255,253,252,.88);backdrop-filter:blur(16px);border-bottom:1px solid #efedee;position:sticky;top:0;z-index:20}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:850;letter-spacing:-.04em}
+  .brand-mark{width:35px;height:35px;border-radius:12px;background:linear-gradient(135deg,#f2cfd8,#cde7f3);display:grid;place-items:center;font-size:19px}
+  .brand small{display:block;font-size:10px;letter-spacing:.16em;color:#96939a;font-weight:700;margin-top:2px}
+  .top-actions{display:flex;align-items:center;gap:10px}
+  .icon-btn{border:1px solid var(--line);background:white;width:40px;height:40px;border-radius:13px;color:#626873}
+  .pill-btn{border:1px solid #e8e7e8;border-radius:13px;background:#fff;color:#292b32;padding:11px 16px;font-weight:700}
+  body[data-theme="dark"] .pill-btn{background:#f7f6fa!important;color:#24252c!important;border-color:#f7f6fa!important}
+  .profile-strip{color:var(--ink)}
+  .shell{max-width:1440px;margin:auto;padding:24px 24px 60px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:26px}
+  .main-col{min-width:0}
+  .hero{height:300px;border-radius:24px;overflow:hidden;position:relative;background:linear-gradient(115deg,#d8e9f0 0%,#f6dfe3 52%,#e5e1f4 100%);box-shadow:var(--shadow)}
+  .hero-art{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-end;padding:25px 8%;overflow:hidden}
+  .orb{position:absolute;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff9 0 5%,#c1e4f0 15%,#9bb7d0 44%,#697c9e 70%,#34495d);right:8%;top:-85px;box-shadow:0 0 0 22px #ffffff18,0 0 0 48px #ffffff0e}
+  .hero-symbol{position:absolute;right:12%;top:4%;font-size:180px;line-height:1;color:#fefcf7;text-shadow:0 8px 30px #50617b55;transform:rotate(-12deg)}
+  .hero-copy{position:relative;z-index:2;max-width:62%;align-self:flex-end;margin-right:auto;padding-bottom:33px}
+  .eyebrow{font-size:11px;letter-spacing:.19em;text-transform:uppercase;font-weight:800;color:#5d697a}
+  h1{font-size:clamp(28px,3.4vw,47px);letter-spacing:-.065em;line-height:1.12;margin:12px 0 13px}
+  .hero-copy p{max-width:410px;line-height:1.75;color:#525e6d;margin:0;font-size:14px}
+  .hero-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:17px}
+  .hero-tags span{font-size:11px;border:1px solid #ffffff9c;background:#ffffff70;padding:6px 10px;border-radius:100px;color:#4e5969}
+  .hero-sticker{position:absolute;right:25px;bottom:23px;background:#ffffffc9;border:1px solid #fff;padding:9px 12px;border-radius:14px;font-size:11px;font-weight:700;z-index:3;box-shadow:var(--shadow)}
+  .profile-strip{display:flex;align-items:center;gap:12px;margin:18px 2px 24px}
+  .avatar{width:43px;height:43px;border-radius:15px;background:linear-gradient(135deg,#e9d9f4,#cce8f0);display:grid;place-items:center;font-size:22px;border:2px solid white;box-shadow:0 2px 9px #3331}
+  .profile-name{font-weight:800;font-size:14px}
+  .profile-sub{font-size:11px;color:var(--muted);margin-top:4px}
+  .profile-count{margin-left:auto;display:flex;gap:16px;color:#727681;font-size:12px}
+  .profile-count b{color:#2f3037}
+  .toolbar{background:white;border:1px solid #eeebed;border-radius:18px;padding:14px;display:flex;gap:10px;align-items:center;box-shadow:0 3px 12px #24202a05}
+  .searchbox{display:flex;align-items:center;gap:9px;background:#f5f4f5;border-radius:13px;padding:0 14px;height:44px;flex:1;min-width:100px}
+  .searchbox input{border:0;outline:0;background:transparent;width:100%;min-width:0;color:var(--ink)}
+  .searchbox input::placeholder{color:#9a9ba2}
+  .select{height:44px;border:1px solid var(--line);border-radius:13px;background:#fff;padding:0 12px;color:#6b707a}
+  .sort-btn{height:44px;width:44px;border:1px solid var(--line);background:white;border-radius:13px;color:#666}
+  .filter-row{display:flex;align-items:center;gap:8px;margin:18px 2px 20px;flex-wrap:wrap}
+  .filter-label{font-size:11px;color:#93919a;margin-right:4px}
+  .tag-btn{border:1px solid #ece8ec;background:white;border-radius:10px;padding:8px 12px;color:#7b7a82;font-size:12px}
+  .tag-btn.active{background:#e9e2f8;color:#65518f;border-color:#e9e2f8;font-weight:800}
+  .tag-btn[data-tag="작품캐"].active{background:#f9e1e1;color:#9c5c67}
+  .section-head{display:flex;align-items:end;justify-content:space-between;margin:25px 2px 14px}
+  .section-head h2{font-size:19px;letter-spacing:-.04em;margin:0}
+  .section-head p{margin:6px 0 0;font-size:12px;color:var(--muted)}
+  .view-toggle{display:flex;gap:4px;background:#f0eef0;padding:4px;border-radius:11px}
+  .view-toggle button{border:0;background:transparent;border-radius:8px;padding:7px 9px;color:#83818a;font-size:12px}
+  .view-toggle button.active{background:white;color:#34343a;box-shadow:0 1px 4px #2221}
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .character-card{background:white;border:1px solid #eae7e9;border-radius:16px;overflow:hidden;box-shadow:0 3px 12px #2b25300a;transition:transform .22s,box-shadow .22s;min-width:0}
+  .character-card:hover{transform:translateY(-4px);box-shadow:0 12px 26px #33293a12}
+  .card-art{aspect-ratio: .92;position:relative;overflow:hidden;display:grid;place-items:center;background:linear-gradient(145deg,var(--c1),var(--c2));isolation:isolate}
+  .card-art:before{content:"";position:absolute;width:78%;aspect-ratio:1;border:1px solid #ffffff9c;border-radius:50%;box-shadow:0 0 0 15px #ffffff21,0 0 0 35px #ffffff18;z-index:-1}
+  .card-art:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,#1111);pointer-events:none}
+  .character-emoji{font-size:clamp(76px,10vw,142px);filter:drop-shadow(0 12px 10px #29334420);transition:transform .3s}
+  .character-card:hover .character-emoji{transform:scale(1.06) rotate(-2deg)}
+  .art-label{position:absolute;top:12px;left:12px;background:#ffffffc9;border:1px solid #fff;padding:5px 8px;border-radius:8px;font-size:10px;font-weight:800;color:#5c6170}
+  .favorite{position:absolute;right:10px;top:10px;border:0;background:#ffffffd9;width:31px;height:31px;border-radius:50%;font-size:16px;color:#8b8490;z-index:2}
+  .favorite.on{color:#e66e87}
+  .card-body{padding:13px 13px 14px}
+  .card-title{font-size:14px;font-weight:850;letter-spacing:-.03em;margin:0 0 7px}
+  .card-desc{font-size:11px;color:#81818a;line-height:1.6;margin:0 0 11px;min-height:18px}
+  .chips{display:flex;flex-wrap:wrap;gap:5px}
+  .chip{font-size:10px;color:#81818a;background:#f2f1f2;padding:5px 7px;border-radius:6px}
+  .chip.type{background:#f9e2e4;color:#a55e6a}
+  .card-foot{border-top:1px solid #f1eff1;margin-top:12px;padding-top:10px;display:flex;justify-content:space-between;align-items:center;color:#9997a0;font-size:10px}
+  .open-link{border:0;background:transparent;color:#6e82a1;font-weight:700;font-size:11px;padding:0}
+  .empty{display:none;text-align:center;background:white;border:1px dashed #ddd6df;border-radius:16px;padding:50px 20px;color:#89848f}
+  .empty strong{display:block;color:#4b4850;margin-bottom:8px}
+  .side{position:sticky;top:88px;align-self:start}
+  .side-card{background:white;border:1px solid #eeebed;border-radius:18px;padding:19px;margin-bottom:15px;box-shadow:0 3px 12px #24202a04}
+  .side-title{font-size:14px;font-weight:850;margin:0 0 14px;letter-spacing:-.03em}
+  .side-intro{font-size:12px;line-height:1.8;color:#797984;margin:0}
+  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:16px}
+  .stat{background:#f8f6f8;border-radius:12px;padding:12px}
+  .stat b{display:block;font-size:22px;letter-spacing:-.05em}
+  .stat span{font-size:10px;color:#88838d}
+  .trend{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid #f0edf0}
+  .trend:first-of-type{border-top:0}
+  .trend-icon{width:35px;height:35px;display:grid;place-items:center;border-radius:11px;background:#f3e8f4;font-size:17px}
+  .trend b{display:block;font-size:12px}
+  .trend span{font-size:10px;color:#8b8791;display:block;margin-top:4px}
+  .mini-link{margin-left:auto;color:#a3a0a8}
+  .note{padding:14px;border-radius:13px;background:linear-gradient(135deg,#fff0e8,#e9f4fb);font-size:11px;line-height:1.8;color:#656a75}
+  .note b{display:block;color:#424651;margin-bottom:3px}
+  footer{max-width:1440px;margin:0 auto;padding:0 24px 30px;color:#a19da5;font-size:10px;display:flex;justify-content:space-between;gap:12px}
+  .modal-backdrop{position:fixed;inset:0;background:#20212b70;backdrop-filter:blur(6px);z-index:50;display:none;align-items:center;justify-content:center;padding:18px}
+  .modal-backdrop.show{display:flex}
+  .modal{background:#fffdfd;border-radius:22px;width:min(620px,100%);max-height:90vh;overflow:auto;box-shadow:0 24px 90px #17152140}
+  .modal-top{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}
+  .modal-top h3{margin:0;font-size:17px}
+  .close-modal{border:0;background:#f3f1f3;border-radius:10px;width:34px;height:34px}
+  .modal-content{padding:20px}
+  .detail-layout{display:grid;grid-template-columns:190px 1fr;gap:20px}
+  .detail-art{border-radius:15px;min-height:230px;display:grid;place-items:center;background:linear-gradient(145deg,#e3eff8,#f5dfe8);font-size:100px}
+  .detail-name{font-size:25px;letter-spacing:-.05em;margin:3px 0 8px}
+  .detail-text{font-size:13px;line-height:1.85;color:#686873;white-space:pre-line}
+  .detail-meta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:15px 0}
+  .meta-item{padding:10px;background:#f7f5f7;border-radius:10px}
+  .meta-item span{display:block;font-size:10px;color:#9a96a0;margin-bottom:5px}
+  .meta-item b{font-size:12px}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+  .field label{font-size:11px;font-weight:800;color:#65616c}
+  .field input,.field textarea,.field select{border:1px solid #e8e3e8;border-radius:11px;padding:11px 12px;outline:none;background:white;color:#35333a;width:100%}
+  .field textarea{min-height:85px;resize:vertical}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:#b7a8d9;box-shadow:0 0 0 3px #eee8f8}
+  .form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+  .secondary-btn{border:1px solid var(--line);background:white;border-radius:12px;padding:11px 15px;color:#666}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:80;background:#292b32;color:white;padding:12px 16px;border-radius:12px;font-size:12px;transition:.25s}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .list-view{grid-template-columns:1fr}
+  .list-view .character-card{display:grid;grid-template-columns:130px 1fr}
+  .list-view .card-art{aspect-ratio:auto;min-height:130px}
+  .list-view .character-emoji{font-size:72px}
+  .list-view .card-body{align-self:center}
+
+  [contenteditable="true"]{outline:none;border-radius:5px;cursor:text}
+  [contenteditable="true"]:focus{box-shadow:0 0 0 2px #ffffffb8;background:#ffffff25}
+  .hero{cursor:pointer}
+  .hero-copy{pointer-events:none}
+  .hero-copy [contenteditable="true"],.hero-sticker[contenteditable="true"]{pointer-events:auto}
+  .image-edit-hint{position:absolute;right:16px;top:15px;z-index:5;border:1px solid #ffffffaa;background:#ffffffc9;color:#505767;border-radius:10px;padding:8px 11px;font-size:11px;font-weight:750;opacity:0;transition:opacity .2s}
+  .hero:hover .image-edit-hint,.image-edit-hint:focus{opacity:1}
+  .avatar-upload{position:relative;cursor:pointer;overflow:hidden}
+  .avatar-upload img{width:100%;height:100%;object-fit:cover}
+  .avatar-edit{position:absolute;inset:auto 0 0;background:#282632b8;color:white;text-align:center;font-size:9px;padding:3px;opacity:0}
+  .avatar-upload:hover .avatar-edit{opacity:1}
+  .customize-panel{margin:0 0 22px;background:white;border:1px solid #ece8ed;border-radius:16px;box-shadow:0 3px 12px #24202a05}
+  .customize-panel summary{cursor:pointer;list-style:none;padding:16px;font-size:13px;font-weight:850}
+  .customize-panel summary::-webkit-details-marker{display:none}
+  .customize-panel summary span{font-size:11px;font-weight:500;color:#96919c;margin-left:8px}
+  .customize-grid{padding:0 16px 16px;display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+  .customize-grid .field{margin-bottom:10px}.customize-grid .full,.customize-actions{grid-column:1/-1}
+  .customize-grid input[type=color]{height:42px;padding:4px}
+  .customize-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:5px}
+  .prompt-divider{font-size:11px;font-weight:850;letter-spacing:.12em;color:#81729d;border-top:1px solid #eee8f2;padding-top:16px;margin:3px 0 13px}
+  #characterForm .field textarea{min-height:72px}
+  body[data-font="pretendard"]{font-family:"Pretendard",-apple-system,"Apple SD Gothic Neo",sans-serif}
+  body[data-font="noto"]{font-family:"Noto Sans KR","Apple SD Gothic Neo",sans-serif}
+  body[data-font="nanum"]{font-family:"Nanum Gothic","Apple SD Gothic Neo",sans-serif}
+  body[data-font="gothic"]{font-family:"Malgun Gothic","맑은 고딕",sans-serif}
+  body[data-font="serif"]{font-family:"Noto Serif KR","Batang","바탕",serif}
+  body[data-font="round"]{font-family:"Arial Rounded MT Bold","Apple SD Gothic Neo",sans-serif}
+  body[data-font="english"]{font-family:Arial,Helvetica,sans-serif}
+  body[data-font="mono"]{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+  body[data-font] button,body[data-font] input,body[data-font] textarea,body[data-font] select{font-family:inherit}
+  body[data-bg="blue"] .hero{background:linear-gradient(115deg,#d9eef7,#d9e2fa,#b8d9e5)}
+  body[data-bg="pink"] .hero{background:linear-gradient(115deg,#f9dce7,#f7e5ed,#dcdff6)}
+  body[data-bg="night"] .hero{background:linear-gradient(115deg,#202c43,#39415e,#62516e);color:#fff}
+  body[data-bg="night"] .hero-copy p,body[data-bg="night"] .eyebrow{color:#f0eaf6}
+  body[data-bg="cream"] .hero{background:linear-gradient(115deg,#f4ead9,#eee5d6,#e4d8c8)}
+  body[data-bg="pastel"] .hero{background:linear-gradient(115deg,#d8e9f0 0%,#f6dfe3 52%,#e5e1f4 100%)}
+  :root{--accent:#8d78df}
+  .tag-btn.active{box-shadow:inset 0 0 0 1px var(--accent)}
+  .tag-btn.active{background:var(--accent-soft,#8d78df22)!important;border-color:var(--accent)!important;color:var(--accent)!important}
+  .banner-tool:focus-visible,.profile-tool:focus-visible,.icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  @media(max-width:1050px){.shell{grid-template-columns:minmax(0,1fr) 250px;gap:18px;padding:18px}.grid{gap:12px}.hero{height:270px}.hero-copy{max-width:70%}.side-card{padding:15px}}
+  @media(max-width:760px){.topbar{height:60px;padding:0 15px}.top-actions .pill-btn{padding:10px 12px;font-size:12px}.shell{display:block;padding:14px 13px 40px}.hero{height:285px;border-radius:19px}.hero-copy{max-width:85%;padding-bottom:25px}.hero-art{padding:15px}.orb{width:260px;height:260px;right:-40px;top:-35px}.hero-symbol{font-size:120px;right:0;top:10%}.hero-copy p{font-size:12px;max-width:290px}.hero-sticker{right:12px;bottom:12px;font-size:9px}.profile-count{gap:9px}.toolbar{padding:9px;gap:6px}.select{max-width:88px;padding:0 7px;font-size:11px}.sort-btn{width:38px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card-body{padding:10px}.card-title{font-size:12px}.card-desc{font-size:10px}.side{position:static;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:28px}.side-card{margin:0;padding:14px}.side-card:first-child{grid-column:1/-1}.stat-grid{margin-top:10px}.section-head h2{font-size:17px}footer{padding:0 15px 25px;flex-direction:column}.detail-layout{grid-template-columns:1fr}.detail-art{min-height:160px}.detail-art span{font-size:75px}.form-grid{grid-template-columns:1fr}}
+  @media(max-width:390px){.customize-grid{grid-template-columns:1fr}.customize-grid .full,.customize-actions{grid-column:1}.grid{grid-template-columns:1fr 1fr}.hero{height:265px}.hero-copy{max-width:94%}.hero-copy h1{font-size:28px}.hero-tags span{font-size:9px;padding:5px 7px}.profile-count{font-size:10px}.toolbar .select{display:none}.side{grid-template-columns:1fr}.side-card:first-child{grid-column:auto}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+  /* 수정본: 배너는 이미지 자체만 보여주며, 장식 도형/겹치는 문구를 제거 */
+  .shell{display:block;max-width:900px;padding:16px 18px 55px}
+  .main-col{width:100%}.side{display:none}
+  .hero{height:220px;border-radius:16px;background-color:#eee;background-image:none;background-size:cover;background-position:50% 50%;box-shadow:none;border:1px solid #e9e5e8;cursor:default}
+  .hero:before,.hero:after,.hero-art,.hero-copy,.hero-sticker{display:none!important}
+  .banner-tools{position:absolute;right:10px;top:10px;display:flex;gap:6px;z-index:4}
+  .banner-tool,.profile-tool{width:30px;height:30px;border:1px solid #ffffffb8;background:#ffffffdf;backdrop-filter:blur(8px);border-radius:11px;color:#45434b;font-size:16px;box-shadow:0 2px 9px #2221}
+  .banner-position-panel{display:none;position:absolute;right:10px;top:52px;width:min(250px,calc(100% - 20px));padding:14px;background:#fff;border:1px solid #e9e5e8;border-radius:14px;box-shadow:var(--shadow);z-index:8}
+  .banner-position-panel.show{display:grid;gap:12px}
+  .banner-position-panel label{display:grid;gap:5px;font-size:11px;color:#5e5b65}
+  .banner-position-panel input{width:100%}
+  .profile-strip{position:relative;align-items:flex-start;margin:15px 0 20px;padding:14px;background:#fff;border:1px solid #ece8ec;border-radius:15px;gap:12px}
+  .avatar{width:60px;height:60px;flex:0 0 60px;border-radius:13px;overflow:hidden;position:relative;cursor:pointer}
+  .avatar img{width:100%;height:100%;object-fit:cover}
+  .avatar-edit{position:absolute;inset:auto 0 0;background:#2229;color:white;text-align:center;font-size:9px;padding:3px;opacity:0}
+  .avatar:hover .avatar-edit{opacity:1}
+  .profile-text{min-width:0;flex:1}
+  .profile-text h1{font-size:clamp(22px,4vw,30px);margin:5px 0 8px;line-height:1.25}
+  .profile-name{margin-top:5px}
+  .profile-sub{font-size:12px;line-height:1.5}
+  #heroDescription{font-size:12px;line-height:1.7;color:#777d86;margin:9px 0 0;white-space:pre-wrap}
+  .hero-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+  .hero-tags span{background:#f4f1f7;border:0;font-size:10px;padding:5px 8px;border-radius:6px}
+  .profile-count{display:none}
+  .profile-tool{flex:0 0 30px}
+  .customize-panel{display:none;margin:0 0 18px}
+  .customize-panel[open]{display:block}
+  .customize-panel summary{display:none}
+  .customize-grid{grid-template-columns:1fr;padding:12px}
+  .customize-grid .full,.customize-actions{grid-column:1}
+  .toolbar{padding:10px;gap:7px}
+  .filter-row{margin:13px 1px 18px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+  .character-card{cursor:pointer}
+  .card-art{aspect-ratio: .78}
+  .character-emoji{font-size:clamp(64px,17vw,120px)}
+  .card-foot{display:none}
+  .card-body{padding:11px}
+  .card-title{line-height:1.45}
+  .list-view{grid-template-columns:1fr}
+  .list-view .character-card{display:grid;grid-template-columns:115px 1fr}
+  .list-view .card-art{aspect-ratio:auto;min-height:130px}
+  .list-view .character-emoji{font-size:58px}
+  .modal-backdrop{padding:12px;align-items:center}
+  .modal{width:min(480px,100%);max-height:88dvh;border-radius:18px}
+  .modal-top{position:sticky;top:0;background:#fffdfd;z-index:3;padding:13px 15px}
+  .modal-content{padding:14px}
+  .detail-layout{grid-template-columns:1fr;gap:14px}
+  .detail-art{min-height:180px;max-height:240px}
+  .detail-art span{font-size:86px}
+  .detail-name{font-size:24px}
+  .prompt-detail{margin-top:18px;border-top:1px solid #eee;padding-top:14px}
+  .prompt-detail h4{margin:0 0 10px;font-size:13px}
+  .prompt-row{margin:9px 0}.prompt-row .secondary-btn{font-size:10px!important;padding:5px 8px!important;min-height:27px;border-radius:8px!important;margin-top:5px}.form-actions .secondary-btn{font-size:12px;padding:8px 10px}
+  .prompt-row strong{display:block;font-size:11px;color:#7a6aa0;margin-bottom:5px}
+  .prompt-value{background:#f5f4f5;border-radius:9px;padding:10px;font-size:12px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;min-height:36px}
+  .prompt-value:empty:after{content:"아직 입력되지 않았어요.";color:#aaa}
+  .prompt-row button{margin-top:5px}
+  .form-grid{grid-template-columns:1fr}
+  .form-grid .field{min-width:0}
+  .form-grid input,.form-grid textarea,.field textarea{width:100%;min-height:44px}
+  .field textarea{min-height:82px}
+  .prompt-divider{margin-top:18px}
+  @media(max-width:600px){.shell{padding:12px 12px 40px}.hero{height:180px}.profile-strip{padding:11px;gap:9px}.avatar{width:48px;height:48px;flex-basis:48px}.profile-text h1{font-size:23px}.profile-name{font-size:12px}.profile-sub{font-size:10px}.grid{gap:8px}.card-body{padding:9px}.card-title{font-size:12px}.card-desc{font-size:10px}.toolbar .select{max-width:90px}.section-head{align-items:start}.section-head h2{font-size:16px}}
+\n
+  /* 요청 반영: 이미지 배너, 작은 설정 아이콘, 세로형 캐릭터 프로필 */
+  .hero{height:210px!important;background-color:#f1eef2;background-repeat:no-repeat;background-size:cover;background-position:50% 50%;position:relative}
+  .hero:before,.hero:after,.hero-art,.hero-copy,.hero-sticker,.image-edit-hint{display:none!important}
+  .banner-tools{right:9px;top:9px}
+  .banner-tool{width:31px;height:31px;border-radius:10px;font-size:14px}
+  .profile-strip{align-items:center}
+  .profile-text h1,.eyebrow,#heroDescription,#heroTags{display:none!important}
+  .profile-name{font-size:15px;font-weight:850}
+  .profile-sub{font-size:12px}
+  .customize-panel{display:block!important;margin:0;border:0;box-shadow:none}
+  .customize-panel[open]{display:block!important}
+  .customize-panel summary{display:none!important}
+  .customize-grid{display:grid!important}
+  .modal{width:min(430px,100%);max-height:90dvh}
+  #detailModal .modal{width:min(440px,100%)}
+  #detailModal .modal-content{padding:15px}
+  .detail-layout{display:block!important;gap:14px!important}
+  .detail-art{width:min(100%,260px)!important;aspect-ratio:1/1!important;min-height:0!important;height:auto!important;position:relative;overflow:hidden;border-radius:13px;margin:0 auto 18px}
+  .detail-art img{display:block;width:100%;height:100%;aspect-ratio:1/1;object-fit:cover}
+  .detail-art span{font-size:86px}
+  .detail-layout>div:nth-child(2){min-width:0}
+  .detail-meta{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .prompt-detail{display:block!important}
+  .prompt-value{min-height:40px;overflow-wrap:anywhere}
+  .character-card{cursor:pointer}
+  .card-art{aspect-ratio:1/1!important}
+  .card-art .card-character-image{width:100%;height:100%;position:absolute;inset:0;object-fit:cover}
+  .card-art.has-image .character-emoji{display:none}
+  .character-image-picker{width:100%;aspect-ratio:1/1;max-height:240px;border:1px dashed #dcd4e5;border-radius:12px;background:#faf8fc;display:grid;place-items:center;overflow:hidden;cursor:pointer;color:#81729d;font-size:13px}
+  .character-image-picker img{width:100%;height:100%;object-fit:cover}
+  @media(max-width:600px){.hero{height:170px!important}.modal{width:min(430px,100%)}.detail-art{aspect-ratio:1/1!important}.character-image-picker{max-height:260px}}
+  /* Responsive portrait profile editor; desktop/tablet retain the archive layout. */
+  #formModal .modal{width:min(560px,100%);max-height:92dvh}
+  #settingsModal .modal{width:min(720px,calc(100vw - 24px));max-height:92dvh}
+  #settingsModal .modal-content{overflow-y:auto;max-height:calc(92dvh - 58px)}
+  #formModal .modal-content{max-height:calc(92dvh - 58px);overflow-y:auto}
+  #formModal .character-image-picker{aspect-ratio:1/1;width:min(100%,260px);max-height:none;margin:auto}
+  #detailModal .modal{width:min(860px,calc(100vw - 24px));max-height:92dvh}
+  #detailModal .modal-content{overflow-y:auto}
+  .banner-dragging{cursor:grabbing!important;touch-action:none}.hero{background-repeat:no-repeat}.banner-tools{display:flex;gap:6px}.banner-tool,.profile-tool{font-size:13px;font-weight:900}
+  .favorite{width:25px!important;height:25px!important;font-size:12px!important;right:7px!important;top:7px!important}
+  [data-copy-prompt]{font-size:11px!important;padding:5px 8px!important;min-height:26px!important;border-radius:8px!important}
+  #bannerPositionPanel{display:none!important}
+  @media(max-width:760px){.shell{max-width:none;padding:12px}.hero{height:180px!important}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}#formModal .modal{width:min(520px,calc(100vw - 20px));max-height:94dvh}#formModal .modal-content{max-height:calc(94dvh - 58px)}.detail-layout{display:block!important}.detail-art{width:min(100%,220px)!important;aspect-ratio:1/1!important;min-height:0!important}}
+  @media(min-width:761px){.shell{max-width:1440px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px}.main-col{width:auto}.side{display:block}.hero{height:250px!important}.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.detail-layout{display:block!important}.detail-art{width:min(100%,260px)!important;aspect-ratio:1/1!important;min-height:0!important}.detail-art img{object-fit:cover}}
+
+
+  /* v6 refinements */
+  .sort-btn{display:none!important}
+  #detailModal .modal{width:min(900px,calc(100vw - 32px));max-height:92dvh}
+  #detailModal .modal-content{padding:20px;overflow:auto}
+  #detailModal .detail-layout{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:18px!important}
+  #detailModal .detail-art{grid-row:1;width:100%!important;aspect-ratio:1/1!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0 auto!important;border-radius:14px;overflow:hidden}
+  #detailModal .detail-art img{width:100%;height:100%;object-fit:cover;display:block}
+  #detailModal .modal-top h3:empty{display:none}#detailModal .modal-top{min-height:16px;padding-top:10px;padding-bottom:0;border-bottom:0}#detailModal .detail-layout>div:nth-child(2){grid-row:2;min-width:0}
+  #detailModal .detail-meta{grid-template-columns:repeat(4,minmax(0,1fr))}
+  #detailFavorite{font-size:11px!important;line-height:1.2!important;padding:7px 9px!important;min-height:29px!important;border-radius:9px!important;white-space:nowrap}
+  #detailModal .form-actions{gap:7px;flex-wrap:wrap}
+  #detailModal .form-actions .secondary-btn{font-size:11px!important;padding:7px 9px!important;min-height:29px!important;border-radius:9px!important}
+  .banner-tools{gap:7px}
+  .banner-tool{width:30px;height:30px;border-radius:9px;border:1px solid #ffffffb8;background:#ffffffd9;color:#292b32;box-shadow:0 2px 8px #0001}
+  body[data-theme="dark"]{--ink:#f1eff5;--muted:#b7b3c0;--line:#444552;--paper:#252630;background:#1e1f27!important;color:#f1eff5!important}
+  body[data-theme="dark"] .topbar,body[data-theme="dark"] .toolbar,body[data-theme="dark"] .profile-strip,body[data-theme="dark"] .character-card,body[data-theme="dark"] .side-card,body[data-theme="dark"] .modal,body[data-theme="dark"] .customize-panel,body[data-theme="dark"] .empty{background:#292a35!important;color:#f1eff5!important;border-color:#41424f!important}
+  body[data-theme="dark"] .modal-top{background:#292a35!important;color:#f1eff5!important;border-color:#41424f!important}
+  body[data-theme="dark"] .searchbox,body[data-theme="dark"] .prompt-value,body[data-theme="dark"] .meta-item,body[data-theme="dark"] .stat,body[data-theme="dark"] .select,body[data-theme="dark"] input,body[data-theme="dark"] textarea,body[data-theme="dark"] select{background:#353642!important;color:#f1eff5!important;border-color:#4a4b59!important}
+  body[data-theme="dark"] .tag-btn,body[data-theme="dark"] .view-toggle,body[data-theme="dark"] .view-toggle button,body[data-theme="dark"] .secondary-btn,body[data-theme="dark"] .close-modal{background:#353642!important;color:#e7e3ed!important;border-color:#4a4b59!important}
+  body[data-theme="dark"] .note{background:linear-gradient(135deg,#38313a,#293744)!important;color:#e2dfe8!important}
+  body[data-theme="dark"] .side-intro,body[data-theme="dark"] .side-tip,body[data-theme="dark"] .card-desc,body[data-theme="dark"] .profile-sub,body[data-theme="dark"] .prompt-row strong{color:#bdb8c8!important}
+  body[data-theme="dark"] .profile-count,body[data-theme="dark"] .profile-count b{color:#c9c5d1!important}
+  body[data-theme="dark"] .avatar{border-color:#41424f!important}
+  .trend-icon{overflow:hidden;cursor:text}
+  .trend-icon img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+  .tag-btn{user-select:none}
+  body[data-theme="dark"] .trend,body[data-theme="dark"] .card-foot,body[data-theme="dark"] .prompt-detail{border-color:#41424f!important}
+  [data-user-editable="true"]{cursor:text}
+  [data-user-editable="true"]:focus{outline:1px dashed var(--accent);outline-offset:2px}
+  @media(max-width:760px){#detailModal .modal{width:min(560px,calc(100vw - 20px))}#detailModal .detail-meta{grid-template-columns:repeat(2,minmax(0,1fr))}#detailModal .modal-content{padding:14px}#detailModal .detail-art{width:min(100%,300px)!important}}
+
+  /* v9: 다크 모드와 프로필 이미지 레이아웃 보정 */
+  body[data-theme="dark"] .pill-btn,
+  body[data-theme="dark"] #addTopBtn,
+  body[data-theme="dark"] #addCharacterBtn {
+    background:#292a33 !important;
+    color:#f5f4f8 !important;
+    border-color:#454651 !important;
+  }
+  body[data-theme="dark"] .profile-strip,
+  body[data-theme="dark"] .profile-name,
+  body[data-theme="dark"] .profile-sub,
+  body[data-theme="dark"] .profile-count,
+  body[data-theme="dark"] .profile-count b {
+    color:#f0eff5 !important;
+  }
+  body[data-theme="dark"] .profile-strip {
+    background:#24252d !important;
+    border-color:#3c3d47 !important;
+  }
+  body[data-theme="dark"] .note,
+  body[data-theme="dark"] .note b,
+  body[data-theme="dark"] .note span,
+  body[data-theme="dark"] #sideTipTitle,
+  body[data-theme="dark"] #sideTipText {
+    color:#f2f1f6 !important;
+  }
+  body[data-theme="dark"] .note {
+    background:linear-gradient(135deg,#30303a,#292f38) !important;
+  }
+  /* 캐릭터 상세창: 이미지가 창 너비를 채우는 정사각형 */
+  .detail-layout { display:flex !important; flex-direction:column !important; gap:14px !important; }
+  .detail-art {
+    width:100% !important;
+    aspect-ratio:1 / 1 !important;
+    height:auto !important;
+    min-height:0 !important;
+    max-height:none !important;
+    border-radius:14px !important;
+    overflow:hidden !important;
+    position:relative !important;
+    font-size:clamp(72px,16vw,150px) !important;
+  }
+  .detail-art img,
+  .detail-art .character-image {
+    width:100% !important;height:100% !important;object-fit:cover !important;
+  }
+  @media(min-width:700px) {
+    .modal { width:min(680px,100%) !important; }
+    .detail-layout { display:flex !important; flex-direction:column !important; }
+    .detail-art { max-width:100% !important; }
+  }
+
+
+  /* v10 refinements */
+  .tag-btn.active{box-shadow:none!important}
+  .tag-btn[data-filter="all"].active{background:#e9e2f8!important;border-color:#e9e2f8!important;color:#65518f!important}
+  .tag-btn{min-height:34px;padding:7px 11px;line-height:1.2}
+  .pill-btn,.secondary-btn,.form-actions button,.customize-actions button{min-height:34px;padding:7px 12px;font-size:12px;line-height:1.2;border-radius:10px}
+  .form-actions .pill-btn,.customize-actions .pill-btn{padding:7px 13px;font-size:12px}
+  .card-art{aspect-ratio:1!important;display:block!important;position:relative;overflow:hidden}
+  .card-art .card-character-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:0}
+  .card-art:before,.card-art:after{pointer-events:none}
+  .card-art .character-emoji{position:absolute;inset:0;display:grid;place-items:center;z-index:1}
+  .card-art .art-label,.card-art .favorite{z-index:2}
+  .card-body{position:relative;background:var(--card,#fff);z-index:2}
+  .card-title{overflow-wrap:anywhere;line-height:1.45}
+  .list-view .character-card{grid-template-columns: minmax(115px, 1fr) 1.35fr!important;align-items:start}
+  .list-view .card-art{aspect-ratio:1!important;min-height:0!important}
+  .list-view .card-body{align-self:stretch;min-width:0}
+  .detail-art{aspect-ratio:1!important;width:100%;height:auto!important;min-height:0!important;max-height:none!important;overflow:hidden;position:relative}
+  .detail-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .detail-art span{display:grid;place-items:center;min-height:100%;font-size:clamp(80px,18vw,150px)}
+  .detail-layout{grid-template-columns:minmax(0,1fr)!important}
+  body[data-theme="dark"] .tag-btn[data-filter="all"].active{background:#353642!important;border-color:#4a4b59!important;color:#e7e3ed!important}
+
+
+  [hidden]{display:none!important}
+  .archive-tabs{display:flex;gap:8px;max-width:1440px;margin:16px auto 0;padding:0 24px;flex-wrap:wrap}
+  .archive-tab{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:9px 16px;font-size:13px;font-weight:750}
+  .archive-tab.active{background:#292b32;color:white;border-color:#292b32}
+  .extra-view{max-width:1440px;margin:22px auto 60px;padding:0 24px}
+  .extra-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+  .extra-head h2{margin:0;font-size:24px}.extra-head p{margin:6px 0 0;color:var(--muted);font-size:13px}
+  .illustration-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}.illustration-item-wrap{position:relative;min-width:0}.illustration-item{width:100%;display:block}.illustration-item img,.illustration-placeholder{aspect-ratio:1/1}.illustration-name{display:none}.illustration-actions{display:flex;gap:6px;margin-top:7px}.illustration-actions button{flex:1}.prompt-filter-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}.prompt-archive-card .prompt-tags{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}.prompt-tag{display:inline-flex;border:1px solid var(--line);background:var(--soft);border-radius:999px;padding:6px 11px;font-size:12px;color:var(--muted)}.prompt-result-image{display:block;width:100%;max-width:420px;aspect-ratio:1/1;object-fit:contain;background:#fff;border-radius:12px;margin:12px 0;cursor:pointer}.prompt-result-image-button{display:block;width:100%;border:0;background:#fff;padding:0;cursor:pointer}.prompt-result-image-button img{pointer-events:none}.prompt-hidden-content{display:none}.prompt-hidden-content.is-open{display:block}.prompt-card-image{display:block;width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff;border-radius:12px;cursor:pointer}.illustration-preview-image{display:block;width:100%;height:min(78vh,900px);aspect-ratio:1/1;object-fit:contain;background:#fff}.illustration-item-wrap img{display:block;width:100%;aspect-ratio:1/1;object-fit:contain;border-radius:12px;background:#fff}.illustration-item-wrap .illustration-actions{display:none}.illustration-manage{display:flex;gap:8px;margin-top:8px}.illustration-manage button{flex:1}.prompt-archive-card h3{display:none}.prompt-archive-entry>p{white-space:pre-wrap}.illustration-character-tabs .archive-tab{white-space:nowrap}.prompt-preview{display:block;width:100%;max-height:360px;aspect-ratio:1/1;object-fit:contain;border-radius:10px;margin:8px 0 10px;background:#fff}.prompt-empty{color:var(--muted);font-size:13px}
+  .illustration-item{border:1px solid var(--line);background:var(--paper);border-radius:15px;overflow:hidden;padding:0;text-align:left;color:inherit}
+  .illustration-item img,.illustration-placeholder{display:block;width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff}
+  .illustration-placeholder{display:grid;place-items:center;font-size:46px}
+  .illustration-name{display:block;padding:11px 12px;font-weight:750;font-size:13px}
+  .character-illustration-strip{grid-column:1/-1;margin-top:18px}.character-illustration-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.character-illustration-thumb{padding:0;border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;aspect-ratio:1/1;cursor:pointer}.character-illustration-thumb img{width:100%;height:100%;object-fit:contain;background:#fff}.prompt-archive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:16px;align-items:start}.prompt-archive-card{min-width:0;border:1px solid var(--line);border-radius:16px;padding:16px;background:var(--card)}.prompt-archive-entry{min-width:0}.prompt-archive-entry>p{overflow-wrap:anywhere}
+  .prompt-archive-card{border:1px solid var(--line);background:var(--paper);border-radius:15px;padding:15px;min-width:0}
+  .prompt-archive-card h3{margin:0 0 12px;font-size:15px}.prompt-archive-entry{border-top:1px solid var(--line);padding:11px 0}.prompt-archive-entry b{display:block;font-size:12px;margin-bottom:5px}.prompt-archive-entry p{font-size:12px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 7px;color:var(--muted)}
+  body[data-theme="dark"] .archive-tab,body[data-theme="dark"] .illustration-item,body[data-theme="dark"] .prompt-archive-card{background:#292a35;color:#f1eff5;border-color:#41424f}
+  body[data-theme="dark"] .archive-tab.active{background:#e7e3ed;color:#292a35;border-color:#e7e3ed}
+  @media(max-width:760px){.archive-tabs,.extra-view{padding-left:14px;padding-right:14px}.illustration-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="자캐 아카이브 홈">
+      <span class="brand-mark">✦</span><span>ARCHIVE</span>
+    </a>
+    <div class="top-actions">
+      <button class="icon-btn" id="themeBtn" aria-label="테마 변경" title="테마 변경">☼</button>
+      <button class="pill-btn" id="addTopBtn">＋ 캐릭터 추가</button>
+    </div>
+  </header>
+
+  <nav class="archive-tabs" aria-label="아카이브 보기">
+    <button type="button" class="archive-tab active" data-view="collection">캐릭터</button>
+    <button type="button" class="archive-tab" data-view="illustrations">일러스트</button>
+    <button type="button" class="archive-tab" data-view="prompts">프롬프트 보관함</button>
+  </nav>
+  <section id="illustrationView" class="extra-view" hidden>
+    <div class="extra-head"><div><h2>일러스트</h2><p>일러스트를 추가·수정·삭제하고 캐릭터별로 모아 볼 수 있습니다.</p></div><div class="form-actions"><button type="button" class="secondary-btn" id="addIllustrationBtn">＋ 일러스트 추가</button><button type="button" class="secondary-btn" id="allIllustrationsBtn" hidden>전체 일러스트</button></div></div>
+    <div id="illustrationCharacterFilters" class="prompt-filter-tabs" aria-label="캐릭터별 일러스트"></div><div id="illustrationGrid" class="illustration-grid"></div>
+  </section>
+  <section id="promptArchiveView" class="extra-view" hidden>
+    <div class="extra-head"><div><h2 id="promptArchiveHeading">프롬프트 보관함</h2><p id="promptArchiveSubtitle">인물 · 의상 · 행동/포즈 · 배경 프롬프트와 결과 이미지를 확인할 수 있습니다.</p><div class="form-actions"><button type="button" class="secondary-btn" id="editPromptArchiveTextBtn">보관함 이름·설명 수정</button><button type="button" class="secondary-btn" id="managePromptTagsBtn">태그 추가·삭제</button></div></div><div class="form-actions"><button type="button" class="secondary-btn" id="openAIHelperBtn">AI 도움받기</button><button type="button" class="secondary-btn" id="addPromptEntryBtn">＋ 프롬프트 추가</button></div></div><div class="prompt-filter-tabs" id="promptFilterTabs"></div>
+    <div id="promptArchiveContent" class="prompt-archive-grid"></div>
+  </section>
+  <div class="shell">
+    <main class="main-col">
+      <section class="hero" id="heroBanner" aria-label="배너 이미지">
+        <input type="file" id="bannerUpload" accept="image/*" hidden>
+        <div class="banner-tools">
+          <button class="banner-tool" type="button" id="bannerPick" title="배너 이미지 변경" aria-label="배너 이미지 변경">◆</button>
+          <button class="banner-tool" type="button" id="profileTune" title="프로필 꾸미기" aria-label="프로필 꾸미기">◆</button>
+        </div>
+      </section>
+      <section class="profile-strip" id="profileStrip" aria-label="아카이브 프로필">
+        <label class="avatar avatar-upload" for="profileUpload" title="프로필 이미지를 눌러 변경"><span id="avatarFallback">✦</span><img id="avatarImage" alt="프로필 이미지" hidden><span class="avatar-edit">변경</span></label>
+        <input type="file" id="profileUpload" accept="image/*" hidden>
+        <div class="profile-text">
+          <div class="profile-name" id="profileName" contenteditable="true" title="눌러서 수정">MY ARCHIVE / 개인 자캐 보관함</div>
+          <div class="profile-sub" id="profileSub" contenteditable="true" title="눌러서 수정">내가 만든 인물과 세계관을 차곡차곡 기록해요.</div>
+        </div>
+        <div class="profile-count"><span><b id="totalCount">6</b> 캐릭터</span><span><b id="favCount">1</b> 즐겨찾기</span></div>
+
+      </section>
+
+      <section class="toolbar" aria-label="캐릭터 검색 및 정렬">
+        <label class="searchbox"><span>⌕</span><input id="searchInput" type="search" placeholder="캐릭터 이름, 설정, 태그 검색..." aria-label="캐릭터 검색"></label>
+        <select class="select" id="sortSelect" aria-label="정렬"><option value="default">기본순</option><option value="name">이름순</option><option value="new">최근 추가순</option></select>
+      </section>
+
+      <div class="filter-row" aria-label="캐릭터 분류">
+        <span class="filter-label">태그로 보기</span>
+        <button class="tag-btn active" data-filter="all">전체</button>
+        <button class="tag-btn" data-filter="내캐">내캐</button>
+        <button class="tag-btn" data-filter="작품캐">작품캐</button>
+        <button class="tag-btn" data-filter="드래곤">드래곤</button>
+        <button class="tag-btn" data-filter="수인">수인</button>
+        <button class="tag-btn" data-filter="판타지">판타지</button>
+      </div>
+
+
+      <div class="section-head">
+        <div><h2>캐릭터 컬렉션 <span style="color:#a5a0aa;font-weight:500" id="resultCount">06</span></h2><p>각 카드를 누르면 자세한 프로필과 설정을 볼 수 있어요.</p></div>
+        <div class="view-toggle"><button class="active" id="gridBtn">▦ 카드</button><button id="listBtn">☷ 목록</button></div>
+      </div>
+      <section class="grid" id="characterGrid" aria-label="캐릭터 목록"></section>
+      <div class="empty" id="emptyState"><strong>아직 이 조건에 맞는 캐릭터가 없어요.</strong>검색어를 바꾸거나 다른 태그를 선택해 보세요.</div>
+    </main>
+
+    <aside class="side">
+      <section class="side-card">
+        <h2 class="side-title" id="sideAboutTitle" data-user-editable="true" contenteditable="true">이곳은 어떤 곳인가요?</h2>
+        <p class="side-intro" id="sideAboutText" data-user-editable="true" contenteditable="true">내가 만든 캐릭터의 외형, 성격, 관계, 세계관을 정리하는 개인 공간입니다. 아래 예시 데이터는 자유롭게 수정하거나 새 캐릭터로 바꿔 사용할 수 있어요.</p>
+        <div class="stat-grid">
+          <div class="stat"><b id="sideTotal">06</b><span>등록한 캐릭터</span></div>
+          <div class="stat"><b id="sideFav">01</b><span>마음에 든 캐릭터</span></div>
+        </div>
+      </section>
+      <section class="side-card">
+        <h2 class="side-title" id="sideExploreTitle" data-user-editable="true" contenteditable="true">빠른 탐색</h2>
+        <div class="trend"><div class="trend-icon">🐉</div><div><b data-user-editable="true" contenteditable="true">판타지 / 드래곤</b><span data-user-editable="true" contenteditable="true">종족과 세계관 탐색</span></div><button class="mini-link" data-filter-side="드래곤">›</button></div>
+        <div class="trend"><div class="trend-icon">♟</div><div><b data-user-editable="true" contenteditable="true">관계와 서사</b><span data-user-editable="true" contenteditable="true">캐릭터의 이야기 기록</span></div><button class="mini-link" data-filter-side="작품캐">›</button></div>
+        <div class="trend"><div class="trend-icon">♡</div><div><b data-user-editable="true" contenteditable="true">내가 좋아하는 캐릭터</b><span data-user-editable="true" contenteditable="true">즐겨찾기 모아보기</span></div><button class="mini-link" id="favoritesOnly">›</button></div>
+      </section>
+      <section class="side-card">
+        <div class="note"><b id="sideTipTitle" data-user-editable="true" contenteditable="true">✧ 작은 기록 팁</b><span id="sideTipText" data-user-editable="true" contenteditable="true">이름, 종족, 성격 키워드부터 채워 보세요. 설정이 쌓이면 캐릭터 사이의 관계와 이야기까지 더 쉽게 정리할 수 있어요.</span></div>
+      </section>
+    </aside>
+  </div>
+  <footer><span>© CHARACTER ARCHIVE · CREATED BY FEADEOK</span><span>캐릭터 아카이브 · 제작자 Feadeok · 데이터는 현재 브라우저에 저장됩니다.</span></footer>
+</div>
+
+<div class="modal-backdrop" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="modal"><div class="modal-top"><h3 id="settingsTitle">아카이브 설정 · 꾸미기</h3><button class="close-modal" data-close="settingsModal" aria-label="설정 닫기">✕</button></div><div class="modal-content">      <details class="customize-panel" id="customizePanel">
+        <summary>⚙ 아카이브 꾸미기 <span>제목 · 이미지 · 글꼴 · 색상</span></summary>
+        <div class="customize-grid">
+          <div class="field"><label for="siteTitleInput">사이트 제목</label><input id="siteTitleInput" value="MY CHARACTER ARCHIVE"></div>
+          <div class="field"><label for="fontSelect">글꼴 선택</label><select id="fontSelect">
+            <option value="system">시스템 기본</option><option value="pretendard">Pretendard</option><option value="noto">Noto Sans KR</option><option value="nanum">나눔고딕</option><option value="gothic">맑은 고딕</option><option value="serif">명조체</option><option value="round">둥근 고딕</option><option value="english">Arial · 영문 모던</option><option value="mono">모노스페이스</option>
+          </select></div>
+          <div class="field"><label for="accentColor">포인트 색상</label><input id="accentColor" type="color" value="#8d78df"></div>
+          <div class="field"><label for="bgStyle">배너 배경</label><select id="bgStyle"><option value="pastel">파스텔</option><option value="blue">블루 드림</option><option value="pink">핑크 클라우드</option><option value="night">미드나잇</option><option value="cream">크림 페이퍼</option></select></div>
+          <div class="field full"><label for="heroTagsInput">배너 태그 (쉼표로 구분)</label><input id="heroTagsInput" value="ORIGINAL CHARACTERS, WORLD BUILDING, STORY ARCHIVE"></div>
+          <div class="field full"><label for="profileNameInput">프로필 이름</label><input id="profileNameInput" value="MY ARCHIVE"></div>
+          <div class="field full"><label for="profileDescInput">프로필 소개</label><input id="profileDescInput" value="내가 만든 인물과 세계관을 차곡차곡 기록해요."></div>
+          <div class="field full"><label for="bannerUrlInput">배너 이미지 URL (선택)</label><input id="bannerUrlInput" placeholder="이미지 주소 또는 배너를 눌러 파일 선택"></div>
+          <div class="field full"><label for="sideAboutTitleInput">오른쪽 안내 제목</label><input id="sideAboutTitleInput" value="이곳은 어떤 곳인가요?"></div>
+          <div class="field full"><label for="sideAboutTextInput">오른쪽 안내 내용</label><textarea id="sideAboutTextInput">내가 만든 캐릭터의 외형, 성격, 관계, 세계관을 정리하는 개인 공간입니다. 아래 예시 데이터는 자유롭게 수정하거나 새 캐릭터로 바꿔 사용할 수 있어요.</textarea></div>
+          <div class="field full"><label for="sideExploreTitleInput">빠른 탐색 제목</label><input id="sideExploreTitleInput" value="빠른 탐색"></div>
+          <div class="prompt-divider full">태그로 보기 설정</div>
+          <div class="field full"><label for="filterLabelsInput">태그 버튼 표시 이름 (쉼표로 구분, 첫 항목은 전체)</label><input id="filterLabelsInput" value="전체, 내캐, 작품캐, 드래곤, 수인, 판타지"></div>
+          <div class="field full"><label for="filterValuesInput">각 버튼이 찾을 태그 (쉼표로 구분, 첫 항목은 all)</label><input id="filterValuesInput" value="all, 내캐, 작품캐, 드래곤, 수인, 판타지"></div>
+          <div class="prompt-divider full">빠른 탐색 항목 설정</div>
+          <div class="field"><label for="explore1Icon">항목 1 이모지 또는 이미지 URL</label><input id="explore1Icon" value="🐉" placeholder="🐉 또는 https://... 이미지 주소"></div><div class="field"><label for="explore1Title">항목 1 제목</label><input id="explore1Title" value="판타지 / 드래곤"></div>
+          <div class="field"><label for="explore1Desc">항목 1 설명</label><input id="explore1Desc" value="종족과 세계관 탐색"></div>
+          <div class="field"><label for="explore1Filter">항목 1 연결 태그</label><input id="explore1Filter" value="드래곤" placeholder="누르면 필터링할 태그"></div>
+          <div class="field"><label for="explore2Icon">항목 2 이모지 또는 이미지 URL</label><input id="explore2Icon" value="♟" placeholder="♟ 또는 https://... 이미지 주소"></div><div class="field"><label for="explore2Title">항목 2 제목</label><input id="explore2Title" value="관계와 서사"></div>
+          <div class="field"><label for="explore2Desc">항목 2 설명</label><input id="explore2Desc" value="캐릭터의 이야기 기록"></div>
+          <div class="field"><label for="explore2Filter">항목 2 연결 태그</label><input id="explore2Filter" value="작품캐" placeholder="누르면 필터링할 태그"></div>
+          <div class="field"><label for="explore3Icon">항목 3 이모지 또는 이미지 URL</label><input id="explore3Icon" value="♡" placeholder="♡ 또는 https://... 이미지 주소"></div><div class="field"><label for="explore3Title">항목 3 제목</label><input id="explore3Title" value="내가 좋아하는 캐릭터"></div>
+          <div class="field"><label for="explore3Desc">항목 3 설명</label><input id="explore3Desc" value="즐겨찾기 모아보기"></div>
+          <div class="field full"><label for="sideTipInput">기록 팁</label><textarea id="sideTipInput">이름, 종족, 성격 키워드부터 채워 보세요. 설정이 쌓이면 캐릭터 사이의 관계와 이야기까지 더 쉽게 정리할 수 있어요.</textarea></div>
+          <div class="customize-actions"><button class="secondary-btn" id="resetSettings" type="button">기본값 복원</button><button class="pill-btn" id="saveSettings" type="button">설정 저장</button></div>
+        </div>
+      </details>
+</div></div>
+</div>
+<div class="modal-backdrop" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+  <div class="modal"><div class="modal-top"><h3 id="detailTitle">캐릭터 프로필</h3><button class="close-modal" data-close="detailModal" aria-label="닫기">✕</button></div><div class="modal-content" id="detailContent"></div></div>
+</div>
+<div class="modal-backdrop" id="formModal" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+  <div class="modal"><div class="modal-top"><h3 id="formTitle">새 캐릭터 기록하기</h3><button class="close-modal" data-close="formModal" aria-label="닫기">✕</button></div>
+    <div class="modal-content">
+      <form id="characterForm">
+        <div class="field">
+          <label for="charImageUpload">캐릭터 이미지 (정사각형 권장 · 이미지를 눌러 선택)</label>
+          <label class="character-image-picker" for="charImageUpload">
+            <img id="charImagePreview" alt="캐릭터 이미지 미리보기" hidden>
+            <span id="charImagePlaceholder">＋ 이미지 선택</span>
+          </label>
+          <input id="charImageUpload" type="file" accept="image/*" hidden>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label for="charName">캐릭터 이름 *</label><input id="charName" name="name" required placeholder="예: 루미"></div>
+          <div class="field"><label for="charEmoji">대표 이모지</label><input id="charEmoji" name="emoji" value="✦" maxlength="4"></div>
+          <div class="field"><label for="charType">분류</label><select id="charType" name="type"><option>오너캐</option><option>자캐</option><option>작품캐</option></select></div>
+          <div class="field"><label for="charSpecies">종족 / 키워드</label><input id="charSpecies" name="species" placeholder="예: 드래곤, 수인"></div>
+          <div class="field"><label for="charAge">나이</label><input id="charAge" name="age" placeholder="예: 불명 / 19세"></div>
+          <div class="field"><label for="charRole">역할</label><input id="charRole" name="role" placeholder="예: 방랑하는 마법사"></div>
+        </div>
+        <div class="field"><label for="charDesc">한 줄 소개</label><input id="charDesc" name="desc" placeholder="캐릭터를 한 문장으로 소개해 주세요."></div>
+        <div class="field"><label for="charPersonality">성격 / 설정</label><textarea id="charPersonality" name="personality" placeholder="성격, 과거, 능력, 관계 등 자유롭게 기록하세요."></textarea></div>
+        <div class="prompt-divider">PROMPT BUILDER · 프롬프트 / 태그</div>
+        <input id="charCategoryPrompt" name="categoryPrompt" type="hidden">
+        <div class="field"><label for="charAppearancePrompt">외형 프롬프트</label><textarea id="charAppearancePrompt" name="appearancePrompt" placeholder="예: long silver hair, golden eyes, horns"></textarea></div>
+        <div class="field"><label for="charClothingPrompt">의상 프롬프트</label><textarea id="charClothingPrompt" name="clothingPrompt" placeholder="예: gothic dress, lace, choker"></textarea></div>
+        <div class="field"><label for="charActionPrompt">행동 / 포즈 프롬프트</label><textarea id="charActionPrompt" name="actionPrompt" placeholder="예: running, sitting, dynamic pose"></textarea></div>
+        <div class="field"><label for="charBackgroundPrompt">배경 프롬프트</label><textarea id="charBackgroundPrompt" name="backgroundPrompt" placeholder="예: moonlit forest, ruined castle"></textarea></div>
+        <div class="field"><label for="charIntegratedPrompt">통합 태그 / 전체 프롬프트</label><textarea id="charIntegratedPrompt" name="integratedPrompt" placeholder="최종 프롬프트를 입력하거나 아래 버튼으로 합치세요."></textarea><button type="button" class="secondary-btn" id="buildPrompt">외형 + 의상 + 행동/포즈 + 배경 합치기</button></div>
+        <div class="field"><label for="charTags">사이트 분류 태그 (쉼표로 구분)</label><input id="charTags" name="tags" placeholder="내캐, 판타지, 드래곤, 은발"></div>
+        <div class="form-actions"><button type="button" class="secondary-btn" data-close="formModal">취소</button><button class="pill-btn" type="submit">기록 저장</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop" id="extraEntryModal"><div class="modal"><div class="modal-top"><h3 id="extraEntryTitle">항목 추가</h3><button type="button" class="close-modal" data-close="extraEntryModal">✕</button></div><div class="modal-content"><form id="extraEntryForm"><input type="hidden" name="entryId"><input type="hidden" name="entryKind"><div class="field"><label>제목</label><input name="title" required placeholder="제목을 입력하세요"></div><div class="field" id="extraImageField"><label id="extraImageLabel">일러스트 이미지</label><input name="imageFile" type="file" accept="image/*"><small id="extraImageHelp">이미지를 업로드하면 이 항목에 저장됩니다. 수정 시 새 이미지를 선택하지 않으면 기존 이미지가 유지됩니다.</small><img id="extraCurrentImagePreview" class="prompt-preview" alt="현재 저장된 이미지" hidden></div><div class="field"><label>연결할 캐릭터</label><select name="characterId"><option value="">연결하지 않음</option></select></div><div class="field" id="extraCategoryField"><label>프롬프트 종류</label><select name="category"><option>외형</option><option>의상</option><option>행동 / 포즈</option><option>배경</option><option>분류</option><option>통합 프롬프트</option><option>기타</option></select></div><div class="field" id="extraTextField"><label>프롬프트 내용</label><textarea name="text" rows="5" placeholder="프롬프트를 입력하세요"></textarea></div><div class="form-actions"><button type="button" class="secondary-btn" data-close="extraEntryModal">취소</button><button type="submit" class="pill-btn">저장</button></div></form></div></div></div>
+<div class="modal-backdrop" id="illustrationPreviewModal"><div class="modal" style="width:min(900px,calc(100vw - 24px))"><div class="modal-top"><h3></h3><button type="button" class="close-modal" data-close="illustrationPreviewModal">✕</button></div><div class="modal-content"><img id="illustrationPreviewImage" alt="일러스트" class="illustration-preview-image"></div></div></div>
+<div class="modal-backdrop" id="aiHelperModal"><div class="modal"><div class="modal-top"><h3>AI 도움받기</h3><button type="button" class="close-modal" data-close="aiHelperModal">✕</button></div><div class="modal-content"><p>도움을 받을 내용을 입력하고 AI 서비스를 선택하세요.</p><textarea id="aiHelperInput" rows="7" placeholder="캐릭터 설정이나 프롬프트를 입력하세요."></textarea><div class="form-actions"><button type="button" class="secondary-btn" id="openChatGPTBtn">ChatGPT에서 도움받기</button><button type="button" class="secondary-btn" id="openClaudeBtn">Claude에서 도움받기</button></div><small>새 창이 차단되면 브라우저의 팝업 허용을 확인하세요. 입력 내용은 자동 전송되지 않으므로 복사해 AI 채팅에 붙여넣어야 합니다.</small></div></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =========================================================
+   자캐 아카이브 데모
+   - 예시 캐릭터 데이터는 아래 starterCharacters에서 편집하세요.
+   - 추가/즐겨찾기 변경은 현재 브라우저의 localStorage에 저장됩니다. 이미지 업로드는 저장 공간을 줄이도록 압축됩니다. 여러 기기 간 공유에는 클라우드 연동이 필요합니다.
+   - 실제 여러 기기에서 공유하려면 별도 서버/데이터베이스가 필요합니다.
+   ========================================================= */
+const starterCharacters = [
+  {id:1,name:"백야",title:"뿔이 달린 작은 용",emoji:"🐉",type:"자캐",species:"용, 드래곤",age:"불명",role:"고요한 수호자",desc:"차가운 달빛을 닮았지만 마음만은 다정한 용.",personality:"낯을 조금 가리지만 한 번 마음을 열면 오래 곁을 지킨다. 오래된 숲과 별빛을 좋아한다.",tags:["내캐","드래곤","판타지"],colors:["#d9e8f5","#b8c9e6"],date:6},
+  {id:2,name:"적월",title:"붉은 달의 계약자",emoji:"🦊",type:"작품캐",species:"수인, 마법사",age:"21세",role:"계약과 거래",desc:"장난스러운 미소 뒤에 비밀을 숨긴 계약자.",personality:"말재주가 좋고 눈치가 빠르다. 타인을 쉽게 믿지 않지만 자신의 사람은 확실하게 지킨다.",tags:["작품캐","수인","판타지"],colors:["#f4d7d1","#e8a59b"],date:5},
+  {id:3,name:"설하",title:"겨울 정원의 안내자",emoji:"🦌",type:"자캐",species:"정령, 판타지",age:"약 300세",role:"정원 관리인",desc:"눈이 내리는 정원에서 길 잃은 이들을 안내한다.",personality:"차분하고 말수가 적다. 작은 생명을 소중히 여기며, 오래된 기억을 꽃과 함께 보관한다.",tags:["내캐","판타지"],colors:["#e4eafa","#c9d5ed"],date:4},
+  {id:4,name:"모카",title:"꼬리 끝에 별이 달린 수인",emoji:"🐈‍⬛",type:"자캐",species:"고양이 수인",age:"18세",role:"견습 탐험가",desc:"호기심이 많고 반짝이는 물건을 모으는 탐험가.",personality:"활발하고 솔직하다. 새로운 장소에 가면 지도를 그리며, 모은 물건마다 이야기를 붙인다.",tags:["내캐","수인"],colors:["#eee0d4","#d9c8bd"],date:3},
+  {id:5,name:"유리",title:"기억을 수집하는 소년",emoji:"🪼",type:"작품캐",species:"인간, 기억술사",age:"17세",role:"기억 아카이브 견습생",desc:"잊힌 순간을 유리병에 담아 보관하는 소년.",personality:"조용하고 관찰력이 뛰어나다. 자신의 기억은 잘 말하지 않지만 남의 이야기를 정성껏 기록한다.",tags:["작품캐","판타지"],colors:["#d7f0f0","#b9d8ed"],date:2},
+  {id:6,name:"라온",title:"구름 위의 작은 별",emoji:"🐏",type:"자캐",species:"양 수인, 천문학",age:"20세",role:"별 관측가",desc:"밤하늘을 기록하며 길을 찾는 별 관측가.",personality:"느긋하고 다정하다. 별자리에 이름을 붙이는 버릇이 있고, 고민이 있는 친구에게 조용히 차를 내어준다.",tags:["내캐","수인","판타지"],colors:["#f8e8cc","#e7d4e8"],date:1}
+];
+const STORAGE_KEY = "my-character-archive-v1";
+let characters = loadCharacters();
+let activeFilter = "all";
+let favoritesOnly = false;
+let sortDirection = 1;
+let viewMode = "grid";
+
+function loadCharacters(){
+  try { const saved = localStorage.getItem(STORAGE_KEY); return saved ? JSON.parse(saved) : starterCharacters; }
+  catch(e){ return starterCharacters; }
+}
+function saveCharacters(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(characters)); return true; } catch(e){ showToast("브라우저 저장 공간에 접근할 수 없습니다."); return false; } }
+function escapeHTML(value){
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+function getVisibleCharacters(){
+  const query = document.getElementById("searchInput").value.trim().toLowerCase();
+  let items = characters.filter(c => {
+    const searchable = [c.name,c.title,c.species,c.role,c.desc,c.personality,...(c.tags||[])].join(" ").toLowerCase();
+    const matchesQuery = searchable.includes(query);
+    const filterKey = String(activeFilter||"all").trim().toLocaleLowerCase();
+    const matchesFilter = filterKey === "all" || String(c.type||"").trim().toLocaleLowerCase() === filterKey || (c.tags||[]).some(t=>String(t).trim().toLocaleLowerCase()===filterKey) || String(c.species||"").toLocaleLowerCase().split(/[,，/]/).some(t=>t.trim()===filterKey);
+    return matchesQuery && matchesFilter && (!favoritesOnly || c.favorite);
+  });
+  const sort = document.getElementById("sortSelect").value;
+  if(sort === "name") items.sort((a,b)=>a.name.localeCompare(b.name,"ko")*sortDirection);
+  if(sort === "new") items.sort((a,b)=>(b.date-a.date)*sortDirection);
+  return items;
+}
+function render(){
+  const grid = document.getElementById("characterGrid");
+  const items = getVisibleCharacters();
+  grid.className = "grid" + (viewMode === "list" ? " list-view" : "");
+  grid.innerHTML = items.map(c => `
+    <article class="character-card" data-card="${c.id}" tabindex="0" role="button" aria-label="캐릭터 ${escapeHTML(c.name)} 프로필 열기">
+      <div class="card-art ${c.image?"has-image":""}" style="--c1:${escapeHTML(c.colors?.[0]||"#e5e8f5")};--c2:${escapeHTML(c.colors?.[1]||"#f4dfe7")}">
+        ${c.image?`<img class="card-character-image" src="${c.image}" alt="${escapeHTML(c.name)} 캐릭터 이미지">`:""}
+        <span class="art-label">${escapeHTML(c.type)}</span>
+        <button class="favorite ${c.favorite?"on":""}" data-favorite="${c.id}" aria-label="${c.favorite?"즐겨찾기 해제":"즐겨찾기 추가"}" title="즐겨찾기">${c.favorite?"♥":"♡"}</button>
+        <span class="character-emoji" aria-hidden="true" ${c.image?'style="display:none"':""}>${escapeHTML(c.emoji||"✦")}</span>
+      </div>
+      <div class="card-body">
+        <h3 class="card-title">${escapeHTML(c.name)} <span style="color:#aaa5af;font-weight:500">/ ${escapeHTML(c.title||"")}</span></h3>
+        <p class="card-desc">${escapeHTML(c.desc||"아직 소개가 작성되지 않았어요.")}</p>
+        <div class="chips">${(c.tags||[]).slice(0,3).map((tag,i)=>`<span class="chip ${i===0?"type":""}">#${escapeHTML(tag)}</span>`).join("")}</div>
+        <div class="card-foot"><span>✧ ${escapeHTML(c.species||"미분류")}</span><button class="open-link" data-open="${c.id}">프로필 보기 ↗</button></div>
+      </div>
+    </article>`).join("");
+  document.getElementById("emptyState").style.display = items.length ? "none" : "block";
+  document.getElementById("resultCount").textContent = String(items.length).padStart(2,"0");
+  const favs = characters.filter(c=>c.favorite).length;
+  document.getElementById("totalCount").textContent = characters.length;
+  document.getElementById("favCount").textContent = favs;
+  document.getElementById("sideTotal").textContent = String(characters.length).padStart(2,"0");
+  document.getElementById("sideFav").textContent = String(favs).padStart(2,"0");
+  document.querySelectorAll("[data-filter]").forEach(b=>b.classList.toggle("active",b.dataset.filter===activeFilter));
+  renderIllustrations(); renderPromptArchive();
+}
+let selectedIllustrationId = null;
+function renderIllustrations(){
+ const grid=document.getElementById("illustrationGrid"); if(!grid)return;
+ const filterRoot=document.getElementById('illustrationCharacterFilters');
+ if(filterRoot){filterRoot.innerHTML='<button type="button" class="archive-tab '+(selectedIllustrationId===null?'active':'')+'" data-illustration-filter="all">전체</button>'+characters.map(c=>`<button type="button" class="archive-tab ${String(selectedIllustrationId)===String(c.id)?'active':''}" data-illustration-filter="${c.id}">${escapeHTML(c.name||'새 캐릭터')}</button>`).join('');}
+ const extras=loadExtraEntries('illustrations').filter(x=>selectedIllustrationId===null||String(x.characterId)===String(selectedIllustrationId));
+ const chars=(selectedIllustrationId===null?characters:characters.filter(c=>String(c.id)===String(selectedIllustrationId))).filter(c=>c.image);
+ grid.innerHTML=chars.map(c=>`<div class="illustration-item-wrap"><button type="button" class="illustration-item" data-character-illustration="${c.id}" aria-label="${escapeHTML(c.name)} 일러스트"><img src="${c.image}" alt="${escapeHTML(c.name)}"></button></div>`).join('');
+ grid.innerHTML+=extras.map(x=>`<div class="illustration-item-wrap"><button type="button" class="illustration-item" data-view-extra-illustration="${x.id}" aria-label="일러스트 크게 보기"><img src="${x.image}" alt=""></button><div class="illustration-manage"><button type="button" class="secondary-btn" data-edit-illustration-extra="${x.id}">수정</button><button type="button" class="secondary-btn" data-delete-illustration-extra="${x.id}">삭제</button></div></div>`).join('');
+ if(!grid.innerHTML)grid.innerHTML='<p>선택한 캐릭터의 일러스트가 없습니다.</p>';
+ document.getElementById("allIllustrationsBtn").hidden=selectedIllustrationId===null;
+}
+const PROMPT_TAGS_KEY='my-character-archive-prompt-tags-v1';
+const PROMPT_TEXT_KEY='my-character-archive-prompt-heading-v1';
+function loadPromptTags(){try{return JSON.parse(localStorage.getItem(PROMPT_TAGS_KEY)||'null')||['인물','의상','행동/포즈','배경','통합 프롬프트','직접 추가']}catch(e){return ['인물','의상','행동/포즈','배경','통합 프롬프트','직접 추가']}}
+function savePromptTags(tags){localStorage.setItem(PROMPT_TAGS_KEY,JSON.stringify(tags));}
+function loadPromptHeading(){try{return JSON.parse(localStorage.getItem(PROMPT_TEXT_KEY)||'null')||{title:'프롬프트 보관함',subtitle:'인물 · 의상 · 행동/포즈 · 배경 프롬프트와 결과 이미지를 확인할 수 있습니다.'}}catch(e){return {title:'프롬프트 보관함',subtitle:'인물 · 의상 · 행동/포즈 · 배경 프롬프트와 결과 이미지를 확인할 수 있습니다.'}}}
+let activePromptFilter='인물';
+function renderPromptTabs(){const root=document.getElementById('promptFilterTabs');if(!root)return;const tags=loadPromptTags();if(!tags.includes(activePromptFilter))activePromptFilter=tags[0]||'인물';root.innerHTML=tags.map(t=>`<button type="button" class="archive-tab ${t===activePromptFilter?'active':''}" data-prompt-filter="${escapeHTML(t)}">${escapeHTML(t)}</button>`).join('');}
+function refreshPromptCategoryOptions(selected=''){
+  const select=document.querySelector('#extraEntryForm select[name="category"]');
+  if(!select)return;
+  const tags=loadPromptTags();
+  const options=tags.length?tags:['인물'];
+  select.innerHTML=options.map(tag=>`<option value="${escapeHTML(tag)}">${escapeHTML(tag)}</option>`).join('');
+  if(selected && !options.includes(selected)){
+    const option=document.createElement('option');option.value=selected;option.textContent=selected;select.appendChild(option);
+  }
+  select.value=selected&&[...select.options].some(o=>o.value===selected)?selected:options[0];
+}
+function renderPromptArchive(){
+ const root=document.getElementById('promptArchiveContent');if(!root)return;
+ const heading=loadPromptHeading();document.getElementById('promptArchiveHeading').textContent=heading.title||'프롬프트 보관함';document.getElementById('promptArchiveSubtitle').textContent=heading.subtitle||'';const promptNavTab=document.querySelector('.archive-tab[data-view="prompts"]');if(promptNavTab)promptNavTab.textContent=heading.title||'프롬프트 보관함';
+ renderPromptTabs();const keyByLabel={'인물':'appearancePrompt','외형':'appearancePrompt','의상':'clothingPrompt','행동/포즈':'actionPrompt','행동 / 포즈':'actionPrompt','배경':'backgroundPrompt','통합 프롬프트':'integratedPrompt'};
+ const norm=v=>String(v||'').trim().replace(/\s+/g,' ').toLowerCase();let entries=[];const saved=loadExtraEntries('prompts');
+ if(activePromptFilter==='직접 추가')entries=saved.map(x=>({...x,extra:true}));
+ else {const key=keyByLabel[activePromptFilter];if(key){entries=characters.map(c=>({id:c.id,title:c.name,category:activePromptFilter,text:String(c[key]||(key==='integratedPrompt'?[c.appearancePrompt,c.clothingPrompt,c.actionPrompt,c.backgroundPrompt].map(v=>String(v||'').trim()).filter(Boolean).join('\n\n'):'')||''),image:c.image,characterId:c.id,tags:c.tags||[],extra:false})).filter(x=>x.text.trim());}entries=entries.concat(saved.filter(x=>norm(x.category)===norm(activePromptFilter)).map(x=>({...x,extra:true,tags:x.tags||[]})));}
+ root.innerHTML=entries.length?entries.map(x=>{const tags=Array.isArray(x.tags)?x.tags:String(x.tags||'').split(',').map(t=>t.trim()).filter(Boolean);const key=(x.extra?'extra':'character')+':'+x.id;return `<article class="prompt-archive-card"><div class="prompt-tags"><span class="prompt-tag">${escapeHTML(x.category||activePromptFilter)}</span>${tags.map(t=>`<span class="prompt-tag">#${escapeHTML(t)}</span>`).join('')}</div><button type="button" class="prompt-result-image-button" data-reveal-prompt="${key}" aria-label="이미지를 눌러 프롬프트 보기">${x.image?`<img class="prompt-card-image" src="${x.image}" alt="프롬프트 결과 이미지">`:`<div class="prompt-card-image prompt-no-image">이미지 없음</div>`}</button><div class="prompt-hidden-content" data-prompt-content="${key}"><div class="prompt-archive-entry"><p>${escapeHTML(x.text||'')}</p><button type="button" class="secondary-btn" data-archive-copy="${x.id}" data-archive-kind="${x.extra?'extra':'character'}" ${!x.text?'disabled':''}>복사</button>${x.extra?` <button type="button" class="secondary-btn" data-edit-extra="prompts:${x.id}">수정</button> <button type="button" class="secondary-btn" data-delete-extra="prompts:${x.id}">삭제</button>`:''}</div></div></article>`}).join(''):`<p class="prompt-empty">「${escapeHTML(activePromptFilter)}」에 해당하는 프롬프트가 없습니다.</p>`;
+}
+
+document.getElementById('managePromptTagsBtn')?.addEventListener('click',()=>openPromptTagManager());
+function openPromptTagManager(){let box=document.getElementById('promptTagManager');if(!box){box=document.createElement('div');box.id='promptTagManager';box.className='modal-backdrop show';box.style.zIndex='1200';box.innerHTML=`<div class="modal" style="max-width:430px;margin-left:auto;margin-right:24px;align-self:flex-start;margin-top:70px;background:#fff;color:#292a32"><div class="modal-top"><h3>프롬프트 태그 관리</h3><button type="button" class="close-modal" id="closePromptTagManager">✕</button></div><div class="modal-content"><div id="promptTagManagerList" style="display:grid;gap:8px;margin-bottom:16px"></div><div style="display:flex;gap:8px"><input id="newPromptTagName" placeholder="새 태그 이름" style="min-width:0;flex:1"><button type="button" class="pill-btn" id="addPromptTagName">추가</button></div><p style="font-size:12px;color:#777;margin-top:10px">태그를 추가하거나 삭제할 수 있습니다.</p></div></div>`;document.body.appendChild(box);box.addEventListener('click',e=>{if(e.target===box||e.target.id==='closePromptTagManager')box.remove();});box.querySelector('#addPromptTagName').addEventListener('click',()=>{const input=box.querySelector('#newPromptTagName');const v=input.value.trim();if(!v)return;const tags=loadPromptTags();if(!tags.includes(v))tags.push(v);savePromptTags(tags);refreshPromptCategoryOptions();input.value='';paintPromptTagManager();renderPromptArchive();});}paintPromptTagManager();function paintPromptTagManager(){const list=box.querySelector('#promptTagManagerList');if(!list)return;list.innerHTML=loadPromptTags().map(t=>`<div style="display:flex;align-items:center;justify-content:space-between;border:1px solid #e8e5e8;border-radius:10px;padding:9px 11px"><span>${escapeHTML(t)}</span><button type="button" class="secondary-btn" data-remove-prompt-tag="${escapeHTML(t)}">삭제</button></div>`).join('');list.querySelectorAll('[data-remove-prompt-tag]').forEach(b=>b.addEventListener('click',()=>{const tags=loadPromptTags().filter(t=>t!==b.dataset.removePromptTag);if(!tags.length){showToast('태그는 최소 하나 필요합니다.');return}savePromptTags(tags);if(!tags.includes(activePromptFilter))activePromptFilter=tags[0];refreshPromptCategoryOptions();paintPromptTagManager();renderPromptArchive();}));}}
+document.getElementById('editPromptArchiveTextBtn')?.addEventListener('click',()=>{const h=loadPromptHeading();const panel=document.createElement('div');panel.className='modal-backdrop show';panel.style.zIndex='1200';panel.innerHTML=`<div class=\"modal\" style=\"max-width:560px;background:#fff;color:#292a32\"><div class=\"modal-top\"><h3>보관함 이름·설명 수정</h3><button type=\"button\" class=\"close-modal\" data-close-heading>✕</button></div><div class=\"modal-content\"><label>제목</label><input id=\"editArchiveHeadingTitle\" value=\"${escapeHTML(h.title)}\" style=\"width:100%;margin:8px 0 14px\"><label>부제목 설명</label><textarea id=\"editArchiveHeadingSubtitle\" rows=\"3\" style=\"width:100%;margin:8px 0 14px\">${escapeHTML(h.subtitle)}</textarea><div class=\"form-actions\"><button type=\"button\" class=\"secondary-btn\" data-close-heading>취소</button><button type=\"button\" class=\"pill-btn\" id=\"saveArchiveHeading\">저장</button></div></div></div>`;document.body.appendChild(panel);panel.querySelectorAll('[data-close-heading]').forEach(b=>b.onclick=()=>panel.remove());panel.querySelector('#saveArchiveHeading').onclick=()=>{const title=panel.querySelector('#editArchiveHeadingTitle').value.trim()||'프롬프트 보관함';const subtitle=panel.querySelector('#editArchiveHeadingSubtitle').value.trim();localStorage.setItem(PROMPT_TEXT_KEY,JSON.stringify({title,subtitle}));panel.remove();renderPromptArchive();showToast('프롬프트 보관함 이름과 설명을 저장했어요.');};});
+document.getElementById('detailContent')?.addEventListener('click',e=>{const b=e.target.closest('[data-detail-illustration]');if(!b)return;const c=characters.find(x=>String(x.id)===b.dataset.detailCharacter);if(!c)return;const extras=loadExtraEntries('illustrations').filter(x=>String(x.characterId)===String(c.id));const all=[...(c.image?[{image:c.image,title:c.name}]:[]),...extras];const item=all[Number(b.dataset.detailIllustration)];if(item?.image){document.getElementById('illustrationPreviewImage').src=item.image;document.getElementById('illustrationPreviewModal').classList.add('show');}});
+
+document.getElementById('promptFilterTabs')?.addEventListener('click',e=>{const b=e.target.closest('[data-prompt-filter]');if(!b)return;activePromptFilter=b.dataset.promptFilter;renderPromptArchive()});
+function switchArchiveView(view){
+ document.querySelectorAll('.archive-tab').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+ document.querySelector('.shell').hidden=view!=='collection';
+ document.getElementById('illustrationView').hidden=view!=='illustrations';
+ document.getElementById('promptArchiveView').hidden=view!=='prompts';
+ if(view==='prompts')renderPromptArchive();
+}
+function showToast(message){
+  const toast = document.getElementById("toast"); toast.textContent = message; toast.classList.add("show");
+  clearTimeout(showToast.timer); showToast.timer = setTimeout(()=>toast.classList.remove("show"),2200);
+}
+function openDetail(id){
+  const c = characters.find(item=>item.id===Number(id)); if(!c) return;
+  document.getElementById("detailTitle").textContent = "";
+  document.getElementById("detailContent").innerHTML = `
+    <div class="detail-layout">
+      <div class="detail-art" style="background:linear-gradient(145deg,${escapeHTML(c.colors?.[0]||"#e3eff8")},${escapeHTML(c.colors?.[1]||"#f5dfe8")})">${c.image?`<img src="${c.image}" alt="${escapeHTML(c.name)} 캐릭터 이미지">`:`<span>${escapeHTML(c.emoji||"✦")}</span>`}</div>
+      <div><div class="eyebrow">${escapeHTML(c.type)} · CHARACTER FILE</div><div style="font-size:12px;color:#8b8490">${escapeHTML(c.title||"")}</div>
+      <div class="detail-meta"><div class="meta-item"><span>종족 / 키워드</span><b>${escapeHTML(c.species||"미분류")}</b></div><div class="meta-item"><span>나이</span><b>${escapeHTML(c.age||"미정")}</b></div><div class="meta-item"><span>역할</span><b>${escapeHTML(c.role||"미정")}</b></div><div class="meta-item"><span>분류</span><b>${escapeHTML(c.type)}</b></div></div>
+      <p class="detail-text">${escapeHTML(c.desc||"소개가 없습니다.")}
+
+${escapeHTML(c.personality||"상세 설정이 아직 없습니다.")}</p>
+      <div class="chips">${(c.tags||[]).map(t=>`<span class="chip">#${escapeHTML(t)}</span>`).join("")}</div>
+      <section class="prompt-detail">
+        <h4>✦ 프롬프트 아카이브</h4>
+        ${[['외형','appearancePrompt'],['의상','clothingPrompt'],['행동 / 포즈','actionPrompt'],['배경','backgroundPrompt']].map(([label,key])=>`<div class="prompt-row"><strong>${label}</strong><div class="prompt-value">${escapeHTML(c[key]||'')}</div><button class="secondary-btn" data-copy-prompt="${c.id}" data-prompt-kind="${key}" type="button">${label} 복사</button></div>`).join('')}
+        <div class="prompt-row"><strong>통합 태그</strong><div class="prompt-value">${escapeHTML(c.integratedPrompt||[c.appearancePrompt,c.clothingPrompt,c.actionPrompt,c.backgroundPrompt].filter(Boolean).join("\n\n"))}</div><button class="secondary-btn" data-copy-prompt="${c.id}" data-prompt-kind="integratedPrompt" type="button">통합 태그 복사</button></div>
+      </section>
+      <div class="form-actions"><button class="secondary-btn" data-edit="${c.id}" type="button">프로필 수정</button><button class="secondary-btn" id="deleteCharacter" data-delete="${c.id}">캐릭터 삭제</button><button class="pill-btn" id="detailFavorite" data-favorite="${c.id}">${c.favorite?"♥ 즐겨찾기 해제":"♡ 즐겨찾기"}</button></div>
+      </div>
+      <section class="character-illustration-strip"><h4>✦ 일러스트</h4><div class="character-illustration-list">${[...(c.image?[{image:c.image,title:c.name}]:[]),...loadExtraEntries('illustrations').filter(x=>String(x.characterId)===String(c.id))].map((x,i)=>`<button type="button" class="character-illustration-thumb" data-detail-illustration="${i}" data-detail-character="${c.id}"><img src="${x.image}" alt="${escapeHTML(x.title||c.name)}"></button>`).join('')||'<p>아직 등록된 일러스트가 없습니다.</p>'}</div></section>
+    </div>`;
+  document.getElementById("detailModal").classList.add("show");
+}
+let editingCharacterId = null;
+function openForm(id=null){
+  const form=document.getElementById("characterForm"); form.reset(); window.pendingCharacterImage=""; editingCharacterId=id;
+  const img=document.getElementById("charImagePreview"), placeholder=document.getElementById("charImagePlaceholder");
+  img.hidden=true;img.removeAttribute("src");placeholder.hidden=false;document.getElementById("charEmoji").value="✦";
+  const c=id==null?null:characters.find(item=>item.id===Number(id));
+  document.getElementById("formTitle").textContent=c?`${c.name} · 프로필 수정`:"새 캐릭터 기록하기";document.querySelector("#characterForm button[type=submit]").textContent=(c && !c._draft)?"수정 내용 저장":"캐릭터 저장";
+  if(c){
+    const values={name:c.name,emoji:c.emoji,type:c.type,species:c.species,age:c.age,role:c.role,desc:c.desc,personality:c.personality,categoryPrompt:c.categoryPrompt,appearancePrompt:c.appearancePrompt,clothingPrompt:c.clothingPrompt,actionPrompt:c.actionPrompt,backgroundPrompt:c.backgroundPrompt,integratedPrompt:c.integratedPrompt,tags:(c.tags||[]).join(", ")};
+    Object.entries(values).forEach(([key,value])=>{const el=form.elements.namedItem(key);if(el)el.value=value||"";});
+    if(c.image){window.pendingCharacterImage=c.image;img.src=c.image;img.hidden=false;placeholder.hidden=true;}
+  }
+  document.getElementById("detailModal").classList.remove("show");document.getElementById("formModal").classList.add("show");
+}
+document.getElementById("searchInput").addEventListener("input",render);
+document.getElementById("sortSelect").addEventListener("change",render);
+const sortDirectionButton=document.getElementById("sortDirection"); if(sortDirectionButton) sortDirectionButton.addEventListener("click",()=>{sortDirection*=-1;render();});
+document.querySelector(".filter-row").addEventListener("click",e=>{const btn=e.target.closest("button[data-filter]");if(!btn)return;activeFilter=btn.dataset.filter||"all";favoritesOnly=false;render();});
+document.querySelectorAll("[data-filter-side]").forEach(btn=>btn.addEventListener("click",()=>{activeFilter=btn.dataset.filterSide;favoritesOnly=false;render();document.querySelector(".filter-row").scrollIntoView({behavior:"smooth",block:"nearest"});}));
+document.getElementById("favoritesOnly").addEventListener("click",()=>{favoritesOnly=!favoritesOnly;activeFilter="all";render();showToast(favoritesOnly?"즐겨찾기 캐릭터만 보고 있어요.":"전체 캐릭터를 보고 있어요.");});
+document.getElementById("gridBtn").addEventListener("click",()=>{viewMode="grid";document.getElementById("gridBtn").classList.add("active");document.getElementById("listBtn").classList.remove("active");render();});
+document.getElementById("listBtn").addEventListener("click",()=>{viewMode="list";document.getElementById("listBtn").classList.add("active");document.getElementById("gridBtn").classList.remove("active");render();});
+document.getElementById("addTopBtn").addEventListener("click",()=>{const id=Date.now();const draft={id,_draft:true,name:"새 캐릭터",title:"",emoji:"✦",type:"자캐",species:"미분류",age:"미정",role:"미정",desc:"",personality:"",tags:["내캐"],colors:["#e3eafa","#f4dfe8"],date:Date.now(),image:"",categoryPrompt:"",appearancePrompt:"",clothingPrompt:"",actionPrompt:"",backgroundPrompt:"",integratedPrompt:""};characters.unshift(draft);if(!saveCharacters()){characters=characters.filter(c=>c.id!==id);return;}activeFilter="all";favoritesOnly=false;render();openForm(id);document.getElementById("charName").select();showToast("새 캐릭터를 생성했어요. 이름과 설정을 입력해 저장해 주세요.");});
+document.querySelectorAll('.archive-tab[data-view]').forEach(btn=>btn.addEventListener('click',()=>switchArchiveView(btn.dataset.view)));
+
+document.getElementById('allIllustrationsBtn').addEventListener('click',()=>{selectedIllustrationId=null;renderIllustrations();});
+document.getElementById('illustrationCharacterFilters')?.addEventListener('click',e=>{const b=e.target.closest('[data-illustration-filter]');if(!b)return;selectedIllustrationId=b.dataset.illustrationFilter==='all'?null:b.dataset.illustrationFilter;renderIllustrations();});
+document.getElementById('illustrationGrid').addEventListener('click',e=>{const view=e.target.closest('[data-view-extra-illustration]');if(view){const x=loadExtraEntries('illustrations').find(v=>String(v.id)===String(view.dataset.viewExtraIllustration));if(x){const modal=document.getElementById('illustrationPreviewModal');document.getElementById('illustrationPreviewImage').src=x.image;modal.classList.add('show');}return}const charView=e.target.closest('[data-character-illustration]');if(charView){openDetail(Number(charView.dataset.characterIllustration));}});
+document.getElementById('promptArchiveContent').addEventListener('click',async e=>{const reveal=e.target.closest('[data-reveal-prompt]');if(reveal){const key=reveal.dataset.revealPrompt;const panel=document.querySelector(`[data-prompt-content=\"${key}\"]`);if(panel)panel.classList.toggle('is-open');return}const b=e.target.closest('[data-archive-copy]');if(!b)return;let value='';if(b.dataset.archiveKind==='extra'){value=loadExtraEntries('prompts').find(x=>String(x.id)===String(b.dataset.archiveCopy))?.text||'';}else{const c=characters.find(x=>Number(x.id)===Number(b.dataset.archiveCopy));if(!c)return;const key=({'분류':'categoryPrompt','외형':'appearancePrompt','의상':'clothingPrompt','행동 / 포즈':'actionPrompt','배경':'backgroundPrompt','통합 프롬프트':'integratedPrompt'})[activePromptFilter]||'';value=c[key]||(key==='integratedPrompt'?[c.appearancePrompt,c.clothingPrompt,c.actionPrompt,c.backgroundPrompt].map(v=>String(v||'').trim()).filter(Boolean).join('\n\n'):'');}try{await navigator.clipboard.writeText(value);}catch(err){const ta=document.createElement('textarea');ta.value=value;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}showToast('프롬프트를 복사했어요.');});
+document.querySelectorAll("[data-close]").forEach(btn=>btn.addEventListener("click",()=>document.getElementById(btn.dataset.close).classList.remove("show")));
+document.querySelectorAll(".modal-backdrop").forEach(backdrop=>backdrop.addEventListener("click",e=>{if(e.target===backdrop)backdrop.classList.remove("show");}));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".modal-backdrop").forEach(m=>m.classList.remove("show"));});
+document.addEventListener("click",e=>{
+  const card=e.target.closest("[data-card]");
+  if(card && !e.target.closest("[data-favorite]") && !e.target.closest("[data-open]")) openDetail(card.dataset.card);
+  const open=e.target.closest("[data-open]"); if(open) openDetail(open.dataset.open);
+  const fav=e.target.closest("[data-favorite]");
+  if(fav){const c=characters.find(item=>item.id===Number(fav.dataset.favorite));if(c){c.favorite=!c.favorite;saveCharacters();render();if(document.getElementById("detailModal").classList.contains("show"))openDetail(c.id);showToast(c.favorite?"즐겨찾기에 추가했어요.":"즐겨찾기를 해제했어요.");}}
+  const edit=e.target.closest("[data-edit]"); if(edit){e.preventDefault();e.stopPropagation();openForm(Number(edit.dataset.edit));return;}
+  const del=e.target.closest("[data-delete]");
+  if(del){e.preventDefault();e.stopPropagation();const id=Number(del.dataset.delete);const c=characters.find(item=>Number(item.id)===id);if(c){characters=characters.filter(item=>Number(item.id)!==id);const saved=saveCharacters();document.getElementById("detailModal").classList.remove("show");document.getElementById("formModal").classList.remove("show");render();showToast(saved?`'${c.name}' 캐릭터를 삭제했어요.`:"삭제는 화면에 반영했지만 브라우저 저장에 실패했습니다.");}return;}
+});
+document.getElementById("characterForm").addEventListener("submit",e=>{
+  e.preventDefault();const f=new FormData(e.currentTarget);
+  const name=String(f.get("name")||document.getElementById("charName").value||"").trim();if(!name){document.getElementById("charName").focus();showToast("캐릭터 이름을 입력해 주세요.");return;}
+  const tags=String(f.get("tags")||"").split(",").map(t=>t.trim()).filter(Boolean);
+  const type=String(f.get("type")||"자캐");if(!tags.includes(type))tags.unshift(type);
+  const data={name,image:window.pendingCharacterImage||"",emoji:String(f.get("emoji")||"✦"),type,species:String(f.get("species")||"미분류"),age:String(f.get("age")||"미정"),role:String(f.get("role")||"미정"),desc:String(f.get("desc")||""),personality:String(f.get("personality")||""),tags,categoryPrompt:String(f.get("categoryPrompt")||""),appearancePrompt:String(f.get("appearancePrompt")||""),clothingPrompt:String(f.get("clothingPrompt")||""),actionPrompt:String(f.get("actionPrompt")||""),backgroundPrompt:String(f.get("backgroundPrompt")||""),integratedPrompt:String(f.get("integratedPrompt")||""),colors:["#e3eafa","#f4dfe8"]};
+  if(editingCharacterId!==null){const idx=characters.findIndex(c=>Number(c.id)===Number(editingCharacterId));if(idx>=0){data.image=window.pendingCharacterImage||characters[idx].image||"";data.colors=characters[idx].colors||data.colors;characters[idx]={...characters[idx],...data};delete characters[idx]._draft;}}
+  else{const nextId=characters.reduce((max,c)=>Math.max(max,Number(c.id)||0),0)+1;characters.unshift({...data,id:nextId,date:Date.now()});}
+  const savedOK=saveCharacters();if(!savedOK){showToast("저장에 실패했습니다. 브라우저 저장 공간을 확인해 주세요.");return;}const wasEdit=editingCharacterId!==null;window.pendingCharacterImage="";editingCharacterId=null;
+  document.getElementById("charImagePreview").hidden=true;document.getElementById("charImagePreview").removeAttribute("src");document.getElementById("charImagePlaceholder").hidden=false;e.currentTarget.reset();document.getElementById("formModal").classList.remove("show");activeFilter="all";favoritesOnly=false;document.getElementById("searchInput").value="";document.getElementById("sortSelect").value="default";render();showToast(wasEdit?"캐릭터 프로필을 수정했어요.":"새 캐릭터를 아카이브에 기록했어요.");
+});
+const EXTRA_ILLUSTRATIONS_KEY='my-character-archive-extra-illustrations-v1'; const EXTRA_PROMPTS_KEY='my-character-archive-extra-prompts-v1';
+function loadExtraEntries(kind){try{return JSON.parse(localStorage.getItem(kind==='illustrations'?EXTRA_ILLUSTRATIONS_KEY:EXTRA_PROMPTS_KEY)||'[]')}catch(e){return []}}
+function saveExtraEntries(kind,items){try{localStorage.setItem(kind==='illustrations'?EXTRA_ILLUSTRATIONS_KEY:EXTRA_PROMPTS_KEY,JSON.stringify(items));return true}catch(e){showToast('저장 공간이 부족합니다. 이미지 용량을 줄여 주세요.');return false}}
+function openExtraEntry(kind,id=null){const form=document.getElementById('extraEntryForm');form.reset();form.elements.entryKind.value=kind;form.elements.entryId.value='';const isIll=kind==='illustrations';refreshPromptCategoryOptions();document.getElementById('extraEntryTitle').textContent=id?'항목 수정':(isIll?'일러스트 추가':'프롬프트 추가');document.getElementById('extraImageField').hidden=false;document.getElementById('extraImageLabel').textContent=isIll?'일러스트 이미지':'결과 예시 이미지 (선택 사항)';document.getElementById('extraImageHelp').textContent='이미지를 업로드하면 이 항목에 저장됩니다. 수정 시 새 이미지를 선택하지 않으면 기존 이미지가 유지됩니다.';document.getElementById('extraCategoryField').hidden=isIll;document.getElementById('extraTextField').hidden=isIll;const select=form.elements.characterId;select.innerHTML='<option value="">연결하지 않음</option>'+characters.map(c=>`<option value="${c.id}">${escapeHTML(c.name)}</option>`).join('');if(id!==null){const item=loadExtraEntries(kind).find(x=>String(x.id)===String(id));if(item){form.elements.entryId.value=item.id;form.elements.title.value=item.title||'';form.elements.characterId.value=item.characterId||'';if(!isIll){refreshPromptCategoryOptions(item.category||loadPromptTags()[0]||'인물');form.elements.text.value=item.text||'';}form.dataset.oldImage=item.image||'';}}else form.dataset.oldImage='';const preview=document.getElementById('extraCurrentImagePreview');if(preview){preview.hidden=!form.dataset.oldImage;preview.src=form.dataset.oldImage||'';}document.getElementById('extraEntryModal').classList.add('show')}
+document.getElementById('addIllustrationBtn')?.addEventListener('click',()=>openExtraEntry('illustrations'));document.getElementById('addPromptEntryBtn')?.addEventListener('click',()=>openExtraEntry('prompts'));
+document.querySelector('#extraEntryForm input[name="imageFile"]')?.addEventListener('change',e=>{const file=e.target.files?.[0],preview=document.getElementById('extraCurrentImagePreview');if(file&&preview){preview.src=URL.createObjectURL(file);preview.hidden=false;}});
+document.getElementById('extraEntryForm').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget,kind=f.elements.entryKind.value,items=loadExtraEntries(kind),id=f.elements.entryId.value||String(Date.now());const old=items.find(x=>String(x.id)===String(id));const finish=image=>{const item={id,title:f.elements.title.value.trim(),characterId:f.elements.characterId.value||'',...{image:image||old?.image||f.dataset.oldImage||''},...(kind==='illustrations'?{}:{category:f.elements.category.value,text:f.elements.text.value.trim()})};if(kind==='illustrations'&&!item.image){showToast('일러스트 이미지를 선택해 주세요.');return}if(kind==='prompts'&&!item.text.trim()){showToast('프롬프트 내용을 입력해 주세요.');return}const next=old?items.map(x=>String(x.id)===String(id)?item:x):[item,...items];if(saveExtraEntries(kind,next)){document.getElementById('extraEntryModal').classList.remove('show');renderIllustrations();renderPromptArchive();showToast(kind==='illustrations'?'일러스트를 저장했어요.':'프롬프트를 저장했어요.')}};const file=f.elements.imageFile.files[0];if(file){imageToData(file,finish)}else finish(old?.image||f.dataset.oldImage||'')});
+document.getElementById('illustrationGrid').addEventListener('click',e=>{const editExtra=e.target.closest('[data-edit-illustration-extra]');if(editExtra){e.stopPropagation();openExtraEntry('illustrations',editExtra.dataset.editIllustrationExtra);return}const delExtra=e.target.closest('[data-delete-illustration-extra]');if(delExtra){e.stopPropagation();saveExtraEntries('illustrations',loadExtraEntries('illustrations').filter(x=>String(x.id)!==String(delExtra.dataset.deleteIllustrationExtra)));renderIllustrations();showToast('일러스트를 삭제했어요.');return}});
+document.getElementById('promptArchiveContent').addEventListener('click',async e=>{const extraCopy=e.target.closest('[data-extra-copy]');if(extraCopy){const item=loadExtraEntries('prompts').find(x=>String(x.id)===String(extraCopy.dataset.extraCopy));if(item){try{await navigator.clipboard.writeText(item.text)}catch(err){}showToast('프롬프트를 복사했어요.')}return}const edit=e.target.closest('[data-edit-extra]');if(edit){const [kind,id]=edit.dataset.editExtra.split(':');openExtraEntry(kind,id);return}const del=e.target.closest('[data-delete-extra]');if(del){const [kind,id]=del.dataset.deleteExtra.split(':');saveExtraEntries(kind,loadExtraEntries(kind).filter(x=>String(x.id)!==String(id)));renderPromptArchive();showToast('프롬프트를 삭제했어요.')}});
+document.getElementById('openAIHelperBtn')?.addEventListener('click',()=>document.getElementById('aiHelperModal').classList.add('show'));
+function openAIService(url){const text=document.getElementById('aiHelperInput').value.trim();if(text){try{navigator.clipboard.writeText(text)}catch(e){}}window.open(url,'_blank','noopener');}
+document.getElementById('openChatGPTBtn')?.addEventListener('click',()=>openAIService('https://chatgpt.com/'));
+document.getElementById('openClaudeBtn')?.addEventListener('click',()=>openAIService('https://claude.ai/new'));
+const THEME_KEY="my-character-archive-theme-v1";
+function applyTheme(){const theme=localStorage.getItem(THEME_KEY)||"light";document.body.dataset.theme=theme;document.getElementById("themeBtn").textContent=theme==="dark"?"☾":"☼";}
+document.getElementById("themeBtn").addEventListener("click",()=>{const dark=document.body.dataset.theme!=="dark";localStorage.setItem(THEME_KEY,dark?"dark":"light");applyTheme();showToast(dark?"다크 모드":"라이트 모드");});
+applyTheme();
+
+// 사용자 설정 저장/적용
+const SETTINGS_KEY="my-character-archive-settings-v1";
+const DEFAULT_SETTINGS={title:"MY CHARACTER ARCHIVE",eyebrow:"MY LITTLE UNIVERSE · 2025—",heroTitle:"나의 작은 세계,<br>그 안의 모든 이야기.",description:"마음속에서 태어난 캐릭터와 그들의 이야기를 한곳에 모아두는 개인 아카이브입니다.",sticker:"✎ 나만의 설정을 기록하는 곳",profileName:"MY ARCHIVE / 개인 자캐 보관함",profileDesc:"내가 만든 인물과 세계관을 차곡차곡 기록해요.",tags:["ORIGINAL CHARACTERS","WORLD BUILDING","STORY ARCHIVE"],font:"system",accent:"#8d78df",bg:"pastel",banner:"",avatar:"",bannerX:50,bannerY:50,bannerZoom:100,sideAboutTitle:"이곳은 어떤 곳인가요?",sideAboutText:"내가 만든 캐릭터의 외형, 성격, 관계, 세계관을 정리하는 개인 공간입니다. 아래 예시 데이터는 자유롭게 수정하거나 새 캐릭터로 바꿔 사용할 수 있어요.",sideExploreTitle:"빠른 탐색",sideTipTitle:"✧ 작은 기록 팁",filterLabels:["전체","내캐","작품캐","드래곤","수인","판타지"],filterValues:["all","내캐","작품캐","드래곤","수인","판타지"],exploreItems:[{icon:"🐉",title:"판타지 / 드래곤",desc:"종족과 세계관 탐색",filter:"드래곤"},{icon:"♟",title:"관계와 서사",desc:"캐릭터의 이야기 기록",filter:"작품캐"},{icon:"♡",title:"내가 좋아하는 캐릭터",desc:"즐겨찾기 모아보기",filter:"favorites"}],sideTipText:"이름, 종족, 성격 키워드부터 채워 보세요. 설정이 쌓이면 캐릭터 사이의 관계와 이야기까지 더 쉽게 정리할 수 있어요."};
+let settings={...DEFAULT_SETTINGS};
+try{settings={...DEFAULT_SETTINGS,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}")};}catch(e){}
+function applySettings(){
+  document.title=settings.title||DEFAULT_SETTINGS.title;
+  const titleInput=document.getElementById("siteTitleInput"); if(titleInput) titleInput.value=settings.title||DEFAULT_SETTINGS.title;
+  document.getElementById("siteTitleInput").value=settings.title;
+  // 배너에는 이미지만 표시합니다. 제목과 소개는 프로필 줄에 배치합니다.
+  document.getElementById("profileName").textContent=settings.profileName;
+  document.getElementById("profileSub").textContent=settings.profileDesc;
+  document.getElementById("profileNameInput").value=settings.profileName;
+  document.getElementById("profileDescInput").value=settings.profileDesc;
+  document.getElementById("heroTagsInput").value=(settings.tags||[]).join(", ");
+  document.getElementById("sideAboutTitleInput").value=settings.sideAboutTitle||DEFAULT_SETTINGS.sideAboutTitle;
+  document.getElementById("sideAboutTextInput").value=settings.sideAboutText||DEFAULT_SETTINGS.sideAboutText;
+  document.getElementById("sideExploreTitleInput").value=settings.sideExploreTitle||DEFAULT_SETTINGS.sideExploreTitle;
+  document.getElementById("sideTipInput").value=settings.sideTipText||DEFAULT_SETTINGS.sideTipText;
+  document.getElementById("sideTipTitle").textContent=settings.sideTipTitle||DEFAULT_SETTINGS.sideTipTitle;
+  const labels=settings.filterLabels||DEFAULT_SETTINGS.filterLabels, values=settings.filterValues||DEFAULT_SETTINGS.filterValues;
+  document.getElementById("filterLabelsInput").value=labels.join(", ");document.getElementById("filterValuesInput").value=values.join(", ");
+  const filterRow=document.querySelector(".filter-row");
+  filterRow.querySelectorAll("button[data-filter]").forEach(b=>b.remove());
+  labels.forEach((label,i)=>{const b=document.createElement("button");b.type="button";b.className="tag-btn"+(String(values[i]||"all")===activeFilter?" active":"");b.dataset.filter=(i===0?"all":(values[i]||label)).trim();b.textContent=label;filterRow.appendChild(b);});
+  const exploreItems=settings.exploreItems||DEFAULT_SETTINGS.exploreItems;
+  exploreItems.forEach((item,i)=>{const n=i+1;const title=document.getElementById(`explore${n}Title`),desc=document.getElementById(`explore${n}Desc`),filter=document.getElementById(`explore${n}Filter`),iconInput=document.getElementById(`explore${n}Icon`);if(iconInput)iconInput.value=item.icon||["🐉","♟","♡"][i];if(title)title.value=item.title||"";if(desc)desc.value=item.desc||"";if(filter)filter.value=item.filter||"";const trend=document.querySelectorAll(".trend")[i];if(trend){const b=trend.querySelector("b"),sp=trend.querySelector("span"),btn=trend.querySelector("button");if(b)b.textContent=item.title||"";if(sp)sp.textContent=item.desc||"";const icon=trend.querySelector(".trend-icon");if(icon){icon.innerHTML="";if((item.icon||"").match(/^https?:\/\//)){const im=document.createElement("img");im.src=item.icon;im.alt="탐색 이미지";icon.appendChild(im);}else icon.textContent=item.icon||["🐉","♟","♡"][i];}if(btn){if(item.filter==="favorites"){btn.id="favoritesOnly";btn.removeAttribute("data-filter-side");}else{btn.id="";btn.dataset.filterSide=item.filter||"";}}}});
+  document.getElementById("sideTipTitle").textContent=settings.sideTipTitle||DEFAULT_SETTINGS.sideTipTitle;
+  document.getElementById("sideAboutTitle").textContent=settings.sideAboutTitle||DEFAULT_SETTINGS.sideAboutTitle;
+  document.getElementById("sideAboutText").textContent=settings.sideAboutText||DEFAULT_SETTINGS.sideAboutText;
+  document.getElementById("sideExploreTitle").textContent=settings.sideExploreTitle||DEFAULT_SETTINGS.sideExploreTitle;
+  document.getElementById("sideTipText").textContent=settings.sideTipText||DEFAULT_SETTINGS.sideTipText;
+
+  document.getElementById("bannerUrlInput").value=settings.banner&&!settings.banner.startsWith("data:")?settings.banner:"";
+  // 태그 설정값은 저장하되 배너 위에는 겹쳐 표시하지 않습니다.
+  document.getElementById("fontSelect").value=settings.font||"system";
+  document.getElementById("accentColor").value=settings.accent||DEFAULT_SETTINGS.accent;
+  document.getElementById("bgStyle").value=settings.bg||"pastel";
+
+  document.body.dataset.font=settings.font||"system";document.body.dataset.bg=settings.bg||"pastel";
+  document.documentElement.style.setProperty("--accent",settings.accent||DEFAULT_SETTINGS.accent);document.documentElement.style.setProperty("--accent-soft",(settings.accent||DEFAULT_SETTINGS.accent)+"22");document.querySelectorAll(".tag-btn.active,.favorite.on").forEach(el=>{el.style.removeProperty("border-color");});
+  const hero=document.getElementById("heroBanner");
+  hero.style.backgroundImage=settings.banner?`url("${settings.banner}")`:"";
+  hero.style.backgroundSize=settings.banner?((settings.bannerZoom||100)>100?`${settings.bannerZoom}% auto`:`cover`): "";hero.style.backgroundPosition=`${settings.bannerX??50}% ${settings.bannerY??50}%`;
+  document.getElementById("avatarImage").hidden=!settings.avatar;
+  document.getElementById("avatarFallback").hidden=!!settings.avatar;
+  if(settings.avatar)document.getElementById("avatarImage").src=settings.avatar;
+}
+function persistSettings(){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));return true;}catch(e){showToast("브라우저 저장 공간이 부족합니다. 이미지 용량을 줄여 주세요.");return false;}}
+function saveSettingsUI(){
+  settings.title=document.getElementById("siteTitleInput").value.trim()||DEFAULT_SETTINGS.title;
+  settings.profileName=document.getElementById("profileNameInput").value.trim();
+  settings.profileDesc=document.getElementById("profileDescInput").value.trim();
+  settings.tags=document.getElementById("heroTagsInput").value.split(",").map(x=>x.trim()).filter(Boolean);
+  settings.sideAboutTitle=document.getElementById("sideAboutTitleInput").value.trim()||DEFAULT_SETTINGS.sideAboutTitle;
+  settings.sideAboutText=document.getElementById("sideAboutTextInput").value.trim();
+  settings.sideExploreTitle=document.getElementById("sideExploreTitleInput").value.trim()||DEFAULT_SETTINGS.sideExploreTitle;
+  settings.sideTipText=document.getElementById("sideTipInput").value.trim();
+  settings.sideTipTitle=document.getElementById("sideTipTitle").textContent.trim()||DEFAULT_SETTINGS.sideTipTitle;
+  settings.filterLabels=document.getElementById("filterLabelsInput").value.split(",").map(x=>x.trim()).filter(Boolean);settings.filterValues=document.getElementById("filterValuesInput").value.split(",").map(x=>x.trim()).filter(Boolean);if(!settings.filterLabels.length){settings.filterLabels=[...DEFAULT_SETTINGS.filterLabels];settings.filterValues=[...DEFAULT_SETTINGS.filterValues];}settings.exploreItems=[1,2,3].map(n=>({icon:document.getElementById(`explore${n}Icon`).value.trim()||["🐉","♟","♡"][n-1],title:document.getElementById(`explore${n}Title`).value.trim(),desc:document.getElementById(`explore${n}Desc`).value.trim(),filter:n===3?"favorites":document.getElementById(`explore${n}Filter`).value.trim()}));
+  settings.font=document.getElementById("fontSelect").value;settings.accent=document.getElementById("accentColor").value;settings.bg=document.getElementById("bgStyle").value;
+  settings.eyebrow="";settings.heroTitle="";settings.description="";settings.sticker="";
+  if(persistSettings()){applySettings();document.getElementById("settingsModal").classList.remove("show");showToast("아카이브 설정을 저장했어요.");}
+}
+document.getElementById("saveSettings").addEventListener("click",saveSettingsUI);
+document.getElementById("filterLabelsInput").addEventListener("input",()=>{});
+document.getElementById("fontSelect").addEventListener("change",e=>{settings.font=e.target.value;document.body.dataset.font=e.target.value;persistSettings();});
+document.getElementById("bgStyle").addEventListener("change",e=>{settings.bg=e.target.value;document.body.dataset.bg=e.target.value;persistSettings();});
+document.getElementById("accentColor").addEventListener("input",e=>{settings.accent=e.target.value;document.documentElement.style.setProperty("--accent",e.target.value);document.documentElement.style.setProperty("--accent-soft",e.target.value+"22");persistSettings();});
+document.getElementById("siteTitleInput").addEventListener("input",e=>{settings.title=e.target.value;document.title=e.target.value;persistSettings();});
+document.getElementById("profileNameInput").addEventListener("input",e=>{settings.profileName=e.target.value;document.getElementById("profileName").textContent=e.target.value;persistSettings();});
+document.getElementById("profileDescInput").addEventListener("input",e=>{settings.profileDesc=e.target.value;document.getElementById("profileSub").textContent=e.target.value;persistSettings();});
+document.getElementById("heroTagsInput").addEventListener("input",e=>{settings.tags=e.target.value.split(",").map(x=>x.trim()).filter(Boolean);persistSettings();});
+document.getElementById("bannerPick").addEventListener("click",e=>{e.stopPropagation();document.getElementById("bannerUpload").click();});
+let bannerDrag=null;
+const banner=document.getElementById("heroBanner");
+banner.addEventListener("pointerdown",e=>{if(!settings.banner||e.target.closest("button,input,label"))return;banner.setPointerCapture(e.pointerId);banner.classList.add("banner-dragging");bannerDrag={x:e.clientX,y:e.clientY,bx:Number(settings.bannerX??50),by:Number(settings.bannerY??50),w:banner.clientWidth,h:banner.clientHeight};});
+banner.addEventListener("pointermove",e=>{if(!bannerDrag)return;settings.bannerX=Math.max(0,Math.min(100,bannerDrag.bx-(e.clientX-bannerDrag.x)/Math.max(1,bannerDrag.w)*100));settings.bannerY=Math.max(0,Math.min(100,bannerDrag.by-(e.clientY-bannerDrag.y)/Math.max(1,bannerDrag.h)*100));applySettings();});
+function finishBannerDrag(){if(!bannerDrag)return;bannerDrag=null;banner.classList.remove("banner-dragging");persistSettings();showToast("배너 위치를 저장했어요.");}
+banner.addEventListener("pointerup",finishBannerDrag);banner.addEventListener("pointercancel",finishBannerDrag);
+document.getElementById("profileTune").addEventListener("click",e=>{e.stopPropagation();document.getElementById("customizePanel").open=true;document.getElementById("settingsModal").classList.add("show");});
+
+
+
+
+// 이미지 업로드 최적화:
+// - 너무 큰 이미지는 최대 1000px로 축소합니다.
+// - WebP 압축을 우선 사용하고, 지원하지 않는 경우 JPEG로 저장합니다.
+// - 이 최적화는 브라우저 저장 공간 사용량을 줄이는 보조책입니다.
+//   여러 기기 간 공유를 하려면 별도 클라우드 데이터베이스/스토리지가 필요합니다.
+function imageToData(file,cb){
+  if(!file)return;
+  if(!file.type.startsWith("image/")){showToast("이미지 파일을 선택해 주세요.");return;}
+  const MAX_FILE_SIZE=20*1024*1024;
+  if(file.size>MAX_FILE_SIZE){showToast("이미지 원본이 20MB를 초과합니다. 더 작은 이미지로 시도해 주세요.");return;}
+  const r=new FileReader();
+  r.onerror=()=>showToast("이미지를 읽지 못했습니다. 다른 파일로 시도해 주세요.");
+  r.onload=()=>{
+    const im=new Image();
+    im.onerror=()=>showToast("이미지 파일을 해석할 수 없습니다.");
+    im.onload=()=>{
+      const c=document.createElement("canvas"),scale=Math.min(1,1000/Math.max(im.width,im.height));
+      c.width=Math.max(1,Math.round(im.width*scale));c.height=Math.max(1,Math.round(im.height*scale));
+      const ctx=c.getContext("2d");
+      if(!ctx){showToast("이미지 변환을 시작할 수 없습니다.");return;}
+      ctx.drawImage(im,0,0,c.width,c.height);
+      let data="";
+      try{
+        data=c.toDataURL("image/webp",.72);
+        if(!data.startsWith("data:image/webp"))data=c.toDataURL("image/jpeg",.72);
+      }catch(err){showToast("이미지 압축에 실패했습니다.");return;}
+      cb(data);
+    };
+    im.src=r.result;
+  };
+  r.readAsDataURL(file);
+}
+document.getElementById("bannerUpload").addEventListener("change",e=>imageToData(e.target.files[0],data=>{settings.banner=data;applySettings();persistSettings();showToast("배너 이미지를 변경했어요.");}));
+document.getElementById("profileUpload").addEventListener("change",e=>imageToData(e.target.files[0],data=>{settings.avatar=data;applySettings();persistSettings();showToast("프로필 이미지를 변경했어요.");}));
+document.getElementById("bannerUrlInput").addEventListener("change",e=>{settings.banner=e.target.value.trim();applySettings();persistSettings();});
+document.getElementById("resetSettings").addEventListener("click",()=>{settings={...DEFAULT_SETTINGS,tags:[...DEFAULT_SETTINGS.tags]};try{localStorage.removeItem(SETTINGS_KEY);localStorage.removeItem("my-character-archive-side-edits-v1");}catch(e){}document.querySelectorAll('[data-user-editable="true"]').forEach(el=>{el.textContent=el.dataset.defaultText||el.textContent;});document.querySelectorAll("[data-user-editable=\"true\"]").forEach(el=>{el.dataset.defaultText=el.textContent.trim();});applySettings();document.getElementById("bannerUpload").value="";document.getElementById("profileUpload").value="";document.getElementById("bannerUrlInput").value="";persistSettings();showToast("기본 설정으로 복원했어요.");});
+["profileName","profileSub"].forEach(id=>document.getElementById(id).addEventListener("blur",()=>{settings.profileName=document.getElementById("profileName").textContent;settings.profileDesc=document.getElementById("profileSub").textContent;persistSettings();}));
+document.addEventListener("click",async e=>{
+ const b=e.target.closest("[data-copy-prompt]"); if(!b)return;
+ const c=characters.find(x=>x.id===Number(b.dataset.copyPrompt)); if(!c)return;
+ const value=c[b.dataset.promptKind] || (b.dataset.promptKind==="integratedPrompt"?[c.appearancePrompt,c.clothingPrompt,c.actionPrompt,c.backgroundPrompt].map(v=>String(v||'').trim()).filter(Boolean).join("\n\n"):"");
+ try{await navigator.clipboard.writeText(value);showToast("프롬프트를 복사했어요.");}catch(err){const ta=document.createElement("textarea");ta.value=value;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();showToast("프롬프트를 복사했어요.");}
+});
+
+document.getElementById("charImageUpload").addEventListener("change",e=>imageToData(e.target.files[0],data=>{window.pendingCharacterImage=data;const img=document.getElementById("charImagePreview");img.src=data;img.hidden=false;document.getElementById("charImagePlaceholder").hidden=true;showToast("캐릭터 이미지를 설정했어요.");}));
+document.getElementById("buildPrompt").addEventListener("click",()=>{document.getElementById("charIntegratedPrompt").value=["charAppearancePrompt","charClothingPrompt","charActionPrompt","charBackgroundPrompt"].map(id=>document.getElementById(id).value.trim()).filter(Boolean).join("\n\n");showToast("외형·의상·행동/포즈·배경 프롬프트를 줄바꿈으로 합쳤어요.");});
+
+document.querySelectorAll('[data-user-editable="true"]').forEach(el=>{el.dataset.defaultText=el.textContent.trim();});
+applySettings();
+// 우측 안내/탐색/태그 라벨을 직접 수정하면 자동 저장합니다.
+document.addEventListener("focusout",e=>{if(!e.target.matches('[data-user-editable="true"]'))return;const data={};document.querySelectorAll('[data-user-editable="true"]').forEach((el,i)=>data[i]=el.textContent.trim());try{localStorage.setItem("my-character-archive-side-edits-v1",JSON.stringify(data));}catch(err){}if(e.target.id==="sideTipTitle"){settings.sideTipTitle=e.target.textContent.trim();persistSettings();}if(e.target.id==="sideTipText"){settings.sideTipText=e.target.textContent.trim();persistSettings();}if(e.target.id==="sideExploreTitle"){settings.sideExploreTitle=e.target.textContent.trim();persistSettings();}if(e.target.id==="sideAboutTitle"){settings.sideAboutTitle=e.target.textContent.trim();persistSettings();}if(e.target.id==="sideAboutText"){settings.sideAboutText=e.target.textContent.trim();persistSettings();}const trend=e.target.closest(".trend");if(trend){const index=Array.from(document.querySelectorAll(".trend")).indexOf(trend);if(index>=0){settings.exploreItems=settings.exploreItems||DEFAULT_SETTINGS.exploreItems;const b=trend.querySelector("b"),sp=trend.querySelector("span");settings.exploreItems[index]={...settings.exploreItems[index],title:b.textContent.trim(),desc:sp.textContent.trim()};persistSettings();}}});
+document.addEventListener("click",e=>{if(e.target.closest('[data-user-editable="true"]'))e.stopPropagation();},true);
+render();
+</script>
+</body>
+</html>
